@@ -135,11 +135,17 @@ public class SearchDeviceListAdapter extends BaseAdapter {
 
         BluetoothDeviceWrapper deviceDetail = mDevices.get(position);
         String deviceName = deviceDetail.getName();
+        String completeName = deviceDetail.getCompleteLocalName();
         String deviceAdd = deviceDetail.getAddress();
         String deviceModel = deviceDetail.getModel();
         int deviceRssi = deviceDetail.getRssi().intValue();
-
-        if (deviceName != null && deviceName.length() > 0) {
+        if((completeName != null) && completeName.length()>0){
+            //设备名长度限制，最大10
+            if (completeName.length() > 10) {
+                completeName = completeName.substring(0, 10);
+            }
+            viewHolder.tvName.setText(completeName);
+        }else if (deviceName != null && deviceName.length() > 0) {
             //设备名长度限制，最大10
             if (deviceName.length() > 10) {
                 deviceName = deviceName.substring(0, 10);
