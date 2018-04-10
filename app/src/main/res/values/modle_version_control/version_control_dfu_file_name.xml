@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="dfu_file_name">
+        <item>BT909_Feasycom_20171127_BL_204_APP_226_Update</item>      <!--BT909-->
+        <item>BP102_Feasycom_20171102_BL_651_APP_830_Update</item>      <!--BP102-->
+        <item>BT909_Feasycom_20171127_BL_204_APP_226_Update</item>      <!--BP109-->
+        <item>BP103_Feasycom_00000000_BL_000_APP_000_Update</item>      <!--BP103-->                                             <!--BP103-->
+        <item>BP104_Feasycom_00000000_BL_000_APP_000_Update</item>      <!--BP104-->                                             <!--BP103-->
+    </string-array>
+</resources>
