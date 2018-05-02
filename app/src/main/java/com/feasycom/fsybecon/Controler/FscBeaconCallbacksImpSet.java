@@ -19,6 +19,7 @@ import static com.feasycom.fsybecon.Activity.SetActivity.OPEN_TEST_MODE;
 
 public class FscBeaconCallbacksImpSet extends FscBeaconCallbacksImp {
     private WeakReference<SetActivity> weakReference;
+    private boolean testDeviceFound = false;
 
     public FscBeaconCallbacksImpSet(WeakReference<SetActivity> weakReference) {
         this.weakReference = weakReference;
@@ -30,16 +31,26 @@ public class FscBeaconCallbacksImpSet extends FscBeaconCallbacksImp {
          * BLE search speed is fast,please pay attention to the life cycle of the device object ,directly use the final type here
          */
         if (OPEN_TEST_MODE) {
-                if((device.getName() != null)&&device.getName().contains("2beacon")){
-                    weakReference.get().getFscBeaconApi().stopScan();
-                    ParameterSettingActivity.actionStart(weakReference.get(),device,"000000");
-                    weakReference.get().finishActivity();
+            if ((device.getName() != null) && device.getName().contains("2beacon")) {
+                weakReference.get().getFscBeaconApi().stopScan();
+                if (!testDeviceFound) {
+                    testDeviceFound = true;
+                } else {
+                    return;
                 }
+                weakReference.get().getHandler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        ParameterSettingActivity.actionStart(weakReference.get(), device, "000000");
+                        weakReference.get().finishActivity();
+                    }
+                }, 3000);
+            }
         } else {
 //            if ((null != device.getgBeacon()) || (null != device.getiBeacon()) || (null != device.getAltBeacon())) {
-                if ((weakReference.get() != null) && (weakReference.get().getDeviceQueue().size() < 350)) {
-                    weakReference.get().getDeviceQueue().offer(device);
-                }
+            if ((weakReference.get() != null) && (weakReference.get().getDeviceQueue().size() < 350)) {
+                weakReference.get().getDeviceQueue().offer(device);
+            }
 //            }
         }
 

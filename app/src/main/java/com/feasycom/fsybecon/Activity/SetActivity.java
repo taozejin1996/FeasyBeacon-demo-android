@@ -46,6 +46,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnItemClick;
 
+import static com.feasycom.fsybecon.Activity.ParameterSettingActivity.SUCESSFUL_COUNT;
+import static com.feasycom.fsybecon.Activity.ParameterSettingActivity.TOTAL_COUNT;
+
 /**
  * Copyright 2017 Shenzhen Feasycom Technology co.,Ltd
  */
@@ -72,11 +75,11 @@ public class SetActivity extends BaseActivity {
     private Activity activity;
     private static final int ENABLE_BT_REQUEST_ID = 1;
     private PinDialog pinDialog;
-    private Handler handler=new Handler();
+    private Handler handler = new Handler();
 
     private Timer timerUI;
     private TimerTask timerTask;
-    public static final boolean OPEN_TEST_MODE=false;
+    public static final boolean OPEN_TEST_MODE = false;
     Queue<BluetoothDeviceWrapper> deviceQueue = new LinkedList<BluetoothDeviceWrapper>();
     /**
      * read and write permissions
@@ -160,10 +163,14 @@ public class SetActivity extends BaseActivity {
              * see onActivityResult to check what is the status of our request
              */
         }
-        fscBeaconApi.startScan(15000);
+        if (OPEN_TEST_MODE) {
+            fscBeaconApi.startScan(25000);
+        } else {
+            fscBeaconApi.startScan(15000);
+        }
         timerUI = new Timer();
         timerTask = new UITimerTask(new WeakReference<SetActivity>((SetActivity) activity));
-        timerUI.schedule(timerTask, 100,100);
+        timerUI.schedule(timerTask, 100, 100);
     }
 
     @Override
@@ -232,7 +239,11 @@ public class SetActivity extends BaseActivity {
 
     @Override
     public void refreshHeader() {
-        headerTitle.setText(getResources().getString(R.string.app_name));
+        if (OPEN_TEST_MODE) {
+            headerTitle.setText(" total " + TOTAL_COUNT + " successful " + SUCESSFUL_COUNT);
+        } else {
+            headerTitle.setText(getResources().getString(R.string.app_name));
+        }
     }
 
     @Override
@@ -309,7 +320,7 @@ public class SetActivity extends BaseActivity {
         }
 
         @Override
-            public void run() {
+        public void run() {
             activityWeakReference.get().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

@@ -19,6 +19,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import static com.feasycom.fsybecon.Activity.SetActivity.OPEN_TEST_MODE;
+import static com.feasycom.fsybecon.Activity.ParameterSettingActivity.SUCESSFUL_COUNT;
 
 
 /**
@@ -41,6 +42,7 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
         if (parameterSettingActivityWeakReference.get().getPin2Connect() == null) {
             fscBeaconApi.startGetDeviceInfo(moduleString);
         }
+        SUCESSFUL_COUNT++;
     }
 
     @Override

@@ -49,6 +49,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import static com.feasycom.fsybecon.Activity.SetActivity.OPEN_TEST_MODE;
+
 /**
  * Copyright 2017 Shenzhen Feasycom Technology co.,Ltd
  */
@@ -112,7 +114,8 @@ public class ParameterSettingActivity extends BaseActivity {
     //for BLE password
     String pin2Connect;
     public static boolean firstEnter = true;
-
+    public static int TOTAL_COUNT=0;
+    public static int SUCESSFUL_COUNT=0;
     public static void actionStart(Context context, BluetoothDeviceWrapper device, String pin) {
         Intent intent = new Intent(context, ParameterSettingActivity.class);
         Bundle mBundle = new Bundle();
@@ -207,12 +210,16 @@ public class ParameterSettingActivity extends BaseActivity {
         PIN.setTextWacher(new ViewUtil.PinTextWatcher(PIN, fscBeaconApi));
         ExtEnd.setTextWacher(new ViewUtil.ExtendTextWatcher(ExtEnd, fscBeaconApi));
         initView();
-        if (!fscBeaconApi.isConnected()) {
-            if (null == device.getFeasyBeacon()
-                    || FeasyBeaconUtil.updateDetermine(device.getFeasyBeacon().getVersion(), device.getFeasyBeacon().getmodule())) {
-            otaDetermineDialog.show();
-            } else {
-                connectAndGetInfomation();
+        if(OPEN_TEST_MODE){
+            connectAndGetInfomation();
+        }else{
+            if (!fscBeaconApi.isConnected()) {
+                if (null == device.getFeasyBeacon()
+                        || FeasyBeaconUtil.updateDetermine(device.getFeasyBeacon().getVersion(), device.getFeasyBeacon().getmodule())) {
+                    otaDetermineDialog.show();
+                } else {
+                    connectAndGetInfomation();
+                }
             }
         }
 
@@ -375,6 +382,7 @@ public class ParameterSettingActivity extends BaseActivity {
         connectDialog.show();
         handler.postDelayed(checkConnect, CHECK_CONNECT_TIME);
         fscBeaconApi.connect(device, pin2Connect);
+        TOTAL_COUNT++;
     }
 
     // enable to add beacon button

@@ -28,6 +28,7 @@ import com.feasycom.fsybecon.Controler.FscBeaconCallbacksImpMain;
 import com.feasycom.fsybecon.R;
 import com.feasycom.fsybecon.Widget.RefreshableView;
 import com.feasycom.util.LogUtil;
+import com.feasycom.util.TeaCode;
 
 import java.lang.ref.WeakReference;
 import java.util.LinkedList;
