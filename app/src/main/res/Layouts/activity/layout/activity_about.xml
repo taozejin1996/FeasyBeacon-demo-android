@@ -114,7 +114,8 @@
         </LinearLayout>
 
         <LinearLayout style="@style/About_LL"
-            android:id="@+id/qr">
+            android:id="@+id/qr"
+            android:visibility="gone">
 
             <TextView
                 style="@style/module_TV"

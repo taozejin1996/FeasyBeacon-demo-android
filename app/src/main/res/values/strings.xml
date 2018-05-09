@@ -59,7 +59,7 @@
     <string name="list_title_index">    Broadcast</string>
     <string name="list_title_info">Broadcast</string>
     //版本消息
-    <string name="version_name">3.0.3</string>
+    <string name="version_name">3.0.4</string>
     <string name="version_update">Get the newest version</string>
     //设备过滤
     <string name="filter">Filter</string>

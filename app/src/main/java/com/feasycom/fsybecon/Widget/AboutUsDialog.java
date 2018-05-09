@@ -49,7 +49,7 @@ public class AboutUsDialog extends BaseDialog {
         ButterKnife.bind(this);
         setCanceledOnTouchOutside(true);
         dialogInfo.setMovementMethod(new ScrollingMovementMethod());
-        dialogInfo.setText(Html.fromHtml("<p><b>Feasycom</b> focus on the researching and developing of IoT (internet of things) products, including Bluetooth Modules ,WiFi and LoRa Modules,etc. With more than 10-year experiences in the wireless connectivity, which ensure us have the capability for providing low-risk product development, reducing system integration cost and shortening product customization cycle to thousands of diverse customer worldwide.</p>\n" +
+        dialogInfo.setText(Html.fromHtml("<p><b>Feasycom</b> focus on the researching and developing of IoT (internet of things) products, including Bluetooth Modules ,WiFi and LoRa Modules,Bluetooth Beacon,etc. With more than 10-year experiences in the wireless connectivity, which ensure us have the capability for providing low-risk product development, reducing system integration cost and shortening product customization cycle to thousands of diverse customer worldwide.</p>\n" +
                 "\n" +
                 "<p>&nbsp</p>\n" +
                 "<p>Feasycom’s engineering and design services include:</p>\n" +

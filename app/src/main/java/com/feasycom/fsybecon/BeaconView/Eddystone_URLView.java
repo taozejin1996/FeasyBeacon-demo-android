@@ -184,7 +184,7 @@ public class Eddystone_URLView extends LinearLayout {
                      * did not find the tail,the head 1 byte (2 bit) so minus one
                      * only up to 17 bytes
                      */
-                    if (header_url.length() - 1 <= 17) {
+                    if (header_url.length() - 1 <= 18) {
                         ViewUtil.setLabelEditBlock(eddystoneUrl, eddystoneUrlLabel);
                         mBeacon.setUrl(value);
                     } else {
