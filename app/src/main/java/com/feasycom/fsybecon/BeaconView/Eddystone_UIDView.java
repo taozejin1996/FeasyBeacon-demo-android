@@ -78,6 +78,10 @@ public class Eddystone_UIDView extends LinearLayout {
         if (null == mBeacon) {
             this.mBeacon = beacon;
             eddystonePower.addTextChangedListener(new ViewUtil.PowerTextWatcher(eddystonePowerLable, eddystonePower, beacon));
+
+            beaconEnable.toggleSwitch(true);
+            mBeacon.setEnable(true);
+
             beaconEnable.setOnStateChangedListener(new SwitchButton.OnStateChangedListener() {
 
                 @Override
@@ -136,18 +140,22 @@ public class Eddystone_UIDView extends LinearLayout {
     }
 
     public void setNameSpace(String temp) {
+        // eddystoneNamespace.setText("111111");
         eddystoneNamespace.setText(temp);
     }
 
     public void setInstance(String temp) {
+        // eddystoneInstance.setText("111111");
         eddystoneInstance.setText(temp);
     }
 
     public void setReserved(String temp) {
+        // eddystoneReserved.setText("111111");
         eddystoneReserved.setText(temp);
     }
 
     public void setPower(String temp) {
+        // eddystonePower.setText("111111");
         eddystonePower.setText(temp);
     }
 
@@ -216,28 +224,31 @@ public class Eddystone_UIDView extends LinearLayout {
      * make sure the cursor is always on the right
      */
     @OnTouch({R.id.eddystone_power, R.id.eddystone_instance, R.id.eddystone_namespace, R.id.eddystone_reserved})
-    public boolean touchListener(EditText v,MotionEvent event) {
-        EditText e = (EditText) v;
-        e.requestFocus();
-        e.setSelection(e.getText().length());
-//        LogUtil.i("action",event.getAction()+"");
-        if (event.getAction() == MotionEvent.ACTION_MOVE) {
-        } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
-        } else if (event.getAction() == MotionEvent.ACTION_UP) {
-        }else if (event.getAction() == MotionEvent.ACTION_CANCEL){
-//            if (firstEnter) {
-//                firstEnter = false;
-//                InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-//                imm.toggleSoftInput(0, InputMethodManager.SHOW_FORCED);
-//            }
-        }
+    public boolean touchListener(EditText v, MotionEvent event) {
+//        EditText e = (EditText) v;
+//        e.requestFocus();
+//        e.setSelection(e.getText().length());
+////        LogUtil.i("action",event.getAction()+"");
+//        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+//        } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
+//        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+//        } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+////            if (firstEnter) {
+////                firstEnter = false;
+//            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+//            imm.toggleSoftInput(0, InputMethodManager.SHOW_FORCED);
+////            }
+//
+//        }
         return false;
     }
 
     @OnClick({R.id.eddystone_power, R.id.eddystone_instance, R.id.eddystone_namespace, R.id.eddystone_reserved})
     public void clickListener(EditText v) {
-        EditText e = (EditText) v;
-        e.requestFocus();
-        e.setSelection(e.getText().length());
+//        EditText e = (EditText) v;
+//        e.requestFocus();
+//        e.setSelection(e.getText().length());
+        v.setCursorVisible(false);
+        v.setCursorVisible(true);
     }
 }

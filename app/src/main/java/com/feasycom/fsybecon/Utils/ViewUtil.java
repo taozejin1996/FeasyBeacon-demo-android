@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
@@ -240,6 +241,7 @@ public abstract class ViewUtil {
         @Override
         public void afterTextChanged(Editable s) {
             String value = s.toString();
+            Log.e("Interval",value);
             if (value.length() == 0) {
                 lableEditView.setRed();
                 return;
@@ -249,6 +251,7 @@ public abstract class ViewUtil {
                 //   int temp= Integer.parseInt(value);
                 if (temp >= 100 && temp <= 700) {
                     lableEditView.setBlock();
+                    // beaconWrapper.setBroadcastInterval(value);
                     beaconWrapper.setBroadcastInterval(value);
                 } else {
                     lableEditView.setRed();
@@ -256,6 +259,96 @@ public abstract class ViewUtil {
             } catch (Exception e) {
                 lableEditView.setRed();
             }
+
+        }
+    }
+
+    /**
+     * broadcast interval limit [100,700]
+     */
+    public static class GsensorTextWatcher implements TextWatcher {
+        private LableEditView lableEditView;
+        private FscBeaconApi beaconWrapper;
+
+        public GsensorTextWatcher(LableEditView lableEditView, FscBeaconApi beaconWrapper) {
+            this.lableEditView = lableEditView;
+            this.beaconWrapper = beaconWrapper;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            lableEditView.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+           /* String value = s.toString();
+            if (value.length() == 0) {
+                lableEditView.setRed();
+                return;
+            }
+            try {
+                double temp = Double.parseDouble(value);
+                //   int temp= Integer.parseInt(value);
+                if (temp >= 100 && temp <= 700) {
+                    lableEditView.setBlock();
+                    beaconWrapper.setGscfg(value,"500");
+                } else {
+                    lableEditView.setRed();
+                }
+            } catch (Exception e) {
+                lableEditView.setRed();
+            }*/
+            lableEditView.setBlock();
+            // beaconWrapper.setGscfg("200", "500");
+        }
+
+    }
+
+
+    public static class KeyTextWatcher implements TextWatcher {
+        private LableEditView lableEditView;
+        private FscBeaconApi beaconWrapper;
+
+        public KeyTextWatcher(LableEditView lableEditView, FscBeaconApi beaconWrapper) {
+            this.lableEditView = lableEditView;
+            this.beaconWrapper = beaconWrapper;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            lableEditView.setInputType(EditorInfo.TYPE_CLASS_NUMBER);
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+          /*  String value = s.toString();
+            if (value.length() == 0) {
+                lableEditView.setRed();
+                return;
+            }
+            try {
+                double temp = Double.parseDouble(value);
+                //   int temp= Integer.parseInt(value);
+                if (temp >= 100 && temp <= 700) {
+                    lableEditView.setBlock();
+                    beaconWrapper.setKeycfg(value,"500");
+                } else {
+                    lableEditView.setRed();
+                }
+            } catch (Exception e) {
+                lableEditView.setRed();
+            }*/
+            lableEditView.setBlock();
+            beaconWrapper.setGscfg("200", "500");
 
         }
     }
@@ -285,7 +378,7 @@ public abstract class ViewUtil {
         @Override
         public void afterTextChanged(Editable s) {
             String value = s.toString();
-            if ( value.length() == 6) {
+            if (value.length() == 6) {
                 lableEditView.setBlock();
                 beaconWrapper.setFscPin(value);
             } else {

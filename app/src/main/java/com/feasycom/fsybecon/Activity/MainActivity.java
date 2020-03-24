@@ -10,8 +10,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -41,6 +43,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.OnItemClick;
 
+import static com.feasycom.fsybecon.Activity.SetActivity.SCAN_FIXED_TIME;
+
 
 /**
  * Copyright 2017 Shenzhen Feasycom Technology co.,Ltd
@@ -63,6 +67,8 @@ public class MainActivity extends BaseActivity {
     ImageView SetButton;
     @BindView(R.id.About_Button)
     ImageView AboutButton;
+    @BindView(R.id.Sensor_Button)
+    ImageView SensorButton;
     private SearchDeviceListAdapter devicesAdapter;
     private FscBeaconApi fscBeaconApi;
     private Activity activity;
@@ -70,6 +76,7 @@ public class MainActivity extends BaseActivity {
     Queue<BluetoothDeviceWrapper> deviceQueue = new LinkedList<BluetoothDeviceWrapper>();
     private Timer timerUI;
     private TimerTask timerTask;
+    private Handler  handler = new Handler();
     /**
      * read and write permissions
      */
@@ -95,7 +102,8 @@ public class MainActivity extends BaseActivity {
     public static void actionStart(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
         context.startActivity(intent);
-        ((Activity) context).overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);// 淡出淡入动画效果
+//        ((Activity) context).overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);// 淡出淡入动画效果
+
     }
 
     @Override
@@ -148,12 +156,17 @@ public class MainActivity extends BaseActivity {
             );
         } else {
             fscBeaconApi.setCallbacks(new FscBeaconCallbacksImpMain(new WeakReference<MainActivity>((MainActivity) activity)));
-            fscBeaconApi.startScan(60000);
+            if(SCAN_FIXED_TIME) {
+                fscBeaconApi.startScan(60000);
+            }else {
+                fscBeaconApi.startScan(0);
+            }
         }
         timerUI = new Timer();
         timerTask = new UITimerTask(new WeakReference<MainActivity>((MainActivity) activity));
         timerUI.schedule(timerTask, 100, 100);
     }
+
 
     @Override
     protected void onPause() {
@@ -198,7 +211,10 @@ public class MainActivity extends BaseActivity {
                         deviceQueue.clear();
                         devicesAdapter.clearList();
                         devicesAdapter.notifyDataSetChanged();
-                        fscBeaconApi.startScan(60000);
+                        fscBeaconApi.stopScan();
+                        Log.e(TAG, "run: 开始扫描" );
+                        fscBeaconApi.startScan(6000);
+                        //fscBeaconApi.startScan(0);
                         refreshableView.finishRefreshing();
                     }
                 });
@@ -224,7 +240,30 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public void refreshHeader() {
-        headerTitle.setText(getResources().getString(R.string.app_name));
+        //headerTitle.setText(getResources().getString(R.string.app_name));
+        headerTitle.setText("Beacon");
+        //headerLeft.setText("Sort");
+        //headerRight.setText("Filter");
+        headerLeft.setVisibility(View.GONE);
+        headerRight.setVisibility(View.GONE);
+    }
+
+    @OnClick(R.id.header_left)
+    public void deviceSort(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                devicesAdapter.sort();
+                devicesAdapter.notifyDataSetChanged();
+            }
+        });
+    }
+
+    @OnClick(R.id.header_right)
+    public void deviceFilterClick() {
+        fscBeaconApi.stopScan();
+        FilterDeviceActivity.actionStart(activity);
+        finishActivity();
     }
 
     @Override
@@ -234,6 +273,7 @@ public class MainActivity extends BaseActivity {
          */
         SetButton.setImageResource(R.drawable.setting_off);
         AboutButton.setImageResource(R.drawable.about_off);
+        SensorButton.setImageResource(R.drawable.sensor_off);
         SearchButton.setImageResource(R.drawable.search_on);
     }
 
@@ -246,20 +286,31 @@ public class MainActivity extends BaseActivity {
 
     }
 
+    @OnClick(R.id.Sensor_Button)
+    public void sensorClick() {
+        fscBeaconApi.stopScan();
+        SensorActivity.actionStart(activity);
+        finishActivity();
+    }
+
     /**
      * about button binding events
      */
     @OnClick(R.id.About_Button)
     public void aboutClick() {
+        fscBeaconApi.stopScan();
         AboutActivity.actionStart(activity);
         finishActivity();
     }
 
+    private static final String TAG = "MainActivity";
     /**
      * set the button binding event
      */
     @OnClick(R.id.Set_Button)
     public void setClick() {
+        fscBeaconApi.stopScan();
+        Log.e(TAG, "setClick: ");
         SetActivity.actionStart(activity);
         finishActivity();
     }

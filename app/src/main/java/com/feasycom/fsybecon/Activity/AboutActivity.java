@@ -3,8 +3,13 @@ package com.feasycom.fsybecon.Activity;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,6 +39,10 @@ public class AboutActivity extends BaseActivity {
     ImageView AboutButton;
     @BindView(R.id.aboutUsTV)
     TextView aboutUsTV;
+    @BindView(R.id.ver)
+    TextView ver;
+    @BindView(R.id.Sensor_Button)
+    ImageView SensorButton;
 
     private Activity activity;
 
@@ -66,6 +75,7 @@ public class AboutActivity extends BaseActivity {
                 "<p>&nbsp</p>\n" +
                 "<p>Aiming at <b><i>&quot Make Communication Easy and Freely &quot</b></i>, Feasycom is dedicated to design and develop high-quality products, efficient services to customers, for today, and all days to come.</p>\n"
         ));
+        ver.setText(packageCode(this));
     }
 
     @Override
@@ -75,7 +85,21 @@ public class AboutActivity extends BaseActivity {
 
     @Override
     public void initView() {
+
     }
+
+    public static String packageCode(Context context) {
+        PackageManager manager = context.getPackageManager();
+        String code = null;
+        try {
+            PackageInfo info = manager.getPackageInfo(context.getPackageName(), 0);
+            code = info.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return code;
+    }
+
 
     @Override
     public void refreshHeader() {
@@ -86,8 +110,20 @@ public class AboutActivity extends BaseActivity {
         SetButton.setImageResource(R.drawable.setting_off);
         AboutButton.setImageResource(R.drawable.about_on);
         SearchButton.setImageResource(R.drawable.search_off);
+        SensorButton.setImageResource(R.drawable.sensor_off);
     }
 
+    private static final String TAG = "AboutActivity";
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK
+                && event.getRepeatCount() == 0) {
+            Log.e(TAG, "onKeyDown: " );
+            SetActivity.actionStart(activity);
+            finishActivity();
+        }
+        return true;
+    }
 
     @OnClick(R.id.qr)
     public void qrClick() {
@@ -110,6 +146,14 @@ public class AboutActivity extends BaseActivity {
     @Override
     public void searchClick() {
         MainActivity.actionStart(activity);
+        activity.finish();
+    }
+
+
+    @OnClick(R.id.Sensor_Button)
+    @Override
+    public void sensorClick() {
+        SensorActivity.actionStart(activity);
         activity.finish();
     }
 

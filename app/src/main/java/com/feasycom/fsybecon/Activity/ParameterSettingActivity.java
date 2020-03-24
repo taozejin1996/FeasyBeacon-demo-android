@@ -1,7 +1,13 @@
 package com.feasycom.fsybecon.Activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothGatt;
+import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -9,21 +15,31 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Adapter;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.feasycom.bean.BeaconBean;
 import com.feasycom.bean.BluetoothDeviceWrapper;
 import com.feasycom.bean.FeasyBeacon;
 import com.feasycom.controler.FscBeaconApi;
 import com.feasycom.controler.FscBeaconApiImp;
+import com.feasycom.controler.FscBeaconCallbacks;
+import com.feasycom.controler.FscBeaconCallbacksImp;
+import com.feasycom.controler.FscBleCentralApi;
+import com.feasycom.controler.FscBleCentralApiImp;
+import com.feasycom.controler.FscBleCentralCallbacks;
+import com.feasycom.controler.FscBleCentralCallbacksImp;
+import com.feasycom.controler.FscSppApi;
+import com.feasycom.controler.FscSppApiImp;
+import com.feasycom.controler.FscSppCallbacksImp;
 import com.feasycom.fsybecon.Adapter.SettingBeaconParameterListAdapter;
+import com.feasycom.fsybecon.BeaconView.IntervalSpinnerView;
+import com.feasycom.fsybecon.BeaconView.GsensorSpinnerView;
+import com.feasycom.fsybecon.BeaconView.KeycfgSpinnerView;
 import com.feasycom.fsybecon.BeaconView.LableButtonView;
 import com.feasycom.fsybecon.BeaconView.LableEditView;
 import com.feasycom.fsybecon.BeaconView.LableSpinnerView;
@@ -35,15 +51,19 @@ import com.feasycom.fsybecon.Widget.InfoDialog;
 import com.feasycom.fsybecon.Widget.OTADetermineDialog;
 import com.feasycom.fsybecon.Widget.ToggleButton;
 import com.feasycom.util.FeasyBeaconUtil;
-import com.feasycom.util.LogUtil;
+import com.feasycom.util.FeasycomUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+
+import javax.security.auth.login.LoginException;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -55,7 +75,7 @@ import static com.feasycom.fsybecon.Activity.SetActivity.OPEN_TEST_MODE;
  * Copyright 2017 Shenzhen Feasycom Technology co.,Ltd
  */
 
-public class ParameterSettingActivity extends BaseActivity {
+public class ParameterSettingActivity extends BaseActivity{
     // do not  injected here otherwise listViewHeader can not use annotation injection
     public ListView parameterlistview;
     View listViewHeader;
@@ -64,6 +84,15 @@ public class ParameterSettingActivity extends BaseActivity {
     LableSpinnerView TxPower;
     @BindView(R.id.TxPowerDivider)
     View TxPowerDivider;
+    @BindView(R.id.adv_interval)
+    IntervalSpinnerView adv_interval;
+    @BindView(R.id.adv_gsensor)
+    GsensorSpinnerView adv_gsensor;
+    @BindView(R.id.adv_keycfg)
+    KeycfgSpinnerView adv_keycfg;
+
+    // @BindView(R.id.AdvIntervalDivider)
+    //View AdvIntervalDivider;
     @BindView(R.id.ConnectableDivider)
     View ConnectableDivider;
     @BindView(R.id.PIN)
@@ -78,12 +107,15 @@ public class ParameterSettingActivity extends BaseActivity {
     TextView headerTitle;
     @BindView(R.id.header_right)
     TextView headerRight;
+
+    /*
     @BindView(R.id.Search_Button)
     ImageView SearchButton;
     @BindView(R.id.Set_Button)
     ImageView SetButton;
     @BindView(R.id.About_Button)
     ImageView AboutButton;
+    */
     @BindView(R.id.Module)
     LableEditView Module;
     @BindView(R.id.Version)
@@ -92,14 +124,25 @@ public class ParameterSettingActivity extends BaseActivity {
     LableEditView Name;
     @BindView(R.id.Interval)
     LableEditView Interval;
+    @BindView(R.id.Gsensor)
+    LableEditView Gsensor;
+    @BindView(R.id.Keycfg)
+    LableEditView Keycfg;
     @BindView(R.id.Connectable)
     LableButtonView Connectable;
     @BindView(R.id.ExtEnd)
     LableEditView ExtEnd;
 
-    private int CHECK_CONNECT_TIME = 12000;
+    private int CHECK_CONNECT_TIME = 50000;
+    private List<String> advIntervalList;
+    private List<String> advin;
+    private List<String> duration;
     private List<String> txPowerlist;
-    private ArrayAdapter<String> spinnerAdapter;
+    private ArrayAdapter<String> intervalSpinnerAdapter;
+    private ArrayAdapter<String> gsensorAdvinSpinnerAdapter;
+    private ArrayAdapter<String> gsensorDurationSpinnerAdapter;
+    private ArrayAdapter<String> keycfgAdvinSpinnerAdapter;
+    private ArrayAdapter<String> keycfgDurationSpinnerAdapter;
     public static final int REQUEST_BEACON_ADD = 1;
     private FscBeaconApi fscBeaconApi;
     private BluetoothDeviceWrapper device;
@@ -114,8 +157,19 @@ public class ParameterSettingActivity extends BaseActivity {
     //for BLE password
     String pin2Connect;
     public static boolean firstEnter = true;
-    public static int TOTAL_COUNT=0;
-    public static int SUCESSFUL_COUNT=0;
+    public static int TOTAL_COUNT = 0;
+    public static int SUCESSFUL_COUNT = 0;
+    public static boolean isModule_BP109 = false;
+    public static boolean isModule_BP101 = false;
+    public static boolean isModule_BP671 = false;
+    public static boolean interval = true;
+    public static boolean gsensor = false;
+    public static boolean keycfg = false;
+    public static boolean buzzer = false;
+    public static boolean led = false;
+    private FscBleCentralApi fscBleCentralApi = null;
+    public static boolean back = false;
+
     public static void actionStart(Context context, BluetoothDeviceWrapper device, String pin) {
         Intent intent = new Intent(context, ParameterSettingActivity.class);
         Bundle mBundle = new Bundle();
@@ -129,6 +183,7 @@ public class ParameterSettingActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        back = false;
         setContentView(R.layout.activity_parameter_configuration);
         activity = this;
         EventBus.getDefault().register(this);
@@ -138,40 +193,117 @@ public class ParameterSettingActivity extends BaseActivity {
         connectDialog = new InfoDialog(activity, "connecting...");
         otaDetermineDialog = new OTADetermineDialog(activity);
         parameterlistview = (ListView) findViewById(R.id.parameter_listview);
-        adapter = new SettingBeaconParameterListAdapter(activity, getLayoutInflater());
+        adapter = new SettingBeaconParameterListAdapter(activity, getLayoutInflater(), device.getFeasyBeacon());
         adapterInit(adapter);
         listViewHeader = (View) getLayoutInflater().inflate(R.layout.setting_parameter_header, null, false);
-
         listViewFooter = (View) getLayoutInflater().inflate(R.layout.setting_parameter_footer, null, false);
-
         parameterlistview.addHeaderView(listViewHeader);
         parameterlistview.addFooterView(listViewFooter, null, false);
+
         /**
          * inject here or listViewHeader can not use annotation injection
          */
         ButterKnife.bind(this);
+
+
+
+/*
         txPowerlist = Arrays.asList(getResources().getStringArray(R.array.txpower_table));
         spinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, txPowerlist);
         TxPower.spinnerInit(spinnerAdapter, txPowerlist);
-
-
+*/
         if (null != device.getFeasyBeacon()) {
             encryptWay = device.getFeasyBeacon().getEncryptionWay();
-            moduleString = device.getFeasyBeacon().getmodule();
+
+            moduleString = device.getFeasyBeacon().getModule();
+            checkLength(encryptWay, device.getFeasyBeacon());
+            advin = Arrays.asList(getResources().getStringArray(R.array.advin));
+            duration = Arrays.asList(getResources().getStringArray(R.array.duration));
+
+
+            if (device.getFeasyBeacon().getGsensor() || device.getFeasyBeacon().getKeycfg()) {
+                advIntervalList = Arrays.asList(getResources().getStringArray(R.array.interval_table_1));
+            } else {
+                advIntervalList = Arrays.asList(getResources().getStringArray(R.array.interval_table));
+            }
+
+            intervalSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, advIntervalList);
+            adv_interval.spinnerInit(intervalSpinnerAdapter, advIntervalList, device.getFeasyBeacon());
+            if (device.getFeasyBeacon().getKeycfg()) {
+                adv_keycfg.setVisibility(View.VISIBLE);
+                keycfgAdvinSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, advin);
+                keycfgDurationSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, duration);
+                adv_keycfg.spinnerAdvin(keycfgAdvinSpinnerAdapter, advin);
+                adv_keycfg.spinnerDuration(keycfgDurationSpinnerAdapter, duration);
+            }
+            if (device.getFeasyBeacon().getGsensor()) {
+                adv_gsensor.setVisibility(View.VISIBLE);
+                gsensorAdvinSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, advin);
+                gsensorDurationSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, duration);
+                adv_gsensor.spinnerAdvin(gsensorAdvinSpinnerAdapter, advin);
+                adv_gsensor.spinnerDuration(gsensorDurationSpinnerAdapter, duration);
+            }
+            /*if (device.getFeasyBeacon().getBuzzer()) {
+                adv_buzzer.setVisibility(View.VISIBLE);
+                advBuzzerList = Arrays.asList(getResources().getStringArray(R.array.buzzer));
+                buzzerSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, advBuzzerList);
+                adv_buzzer.spinnerInit(buzzerSpinnerAdapter, advBuzzerList);
+
+            }
+            if (device.getFeasyBeacon().getLed()) {
+                adv_led.setVisibility(View.VISIBLE);
+                advLedList = Arrays.asList(getResources().getStringArray(R.array.led));
+                ledSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, advLedList);
+                adv_led.spinnerInit(ledSpinnerAdapter, advLedList);
+            }*/
+
+          /*  Log.e("ParameterSetting_Gsenso",device.getFeasyBeacon().getGsensor()+"");
+            Log.e("ParameterSetting_Buzzer",device.getFeasyBeacon().getBuzzer()+"");
+            Log.e("ParameterSetting_Led",device.getFeasyBeacon().getLed()+"");
+             Log.e("ParameterSetting_Key",device.getFeasyBeacon().getKey()+"");*/
+
+
             /**
              * We will be compatible with many modules by moduleString and versionString
              * firmware version
              */
             versionString = device.getFeasyBeacon().getVersion();
             /**
-             * TxPower bind with BP103 BP104
+             * TxPower bind with BP103 BP104 BP106 BP101 BP671
              */
-            if ("26".equals(moduleString) || "27".equals(moduleString)) {
+            if ("26".equals(moduleString) || "27".equals(moduleString) || "28".equals(moduleString) || "29".equals(moduleString)) {
+                isModule_BP109 = false;
+                isModule_BP101 = false;
+                isModule_BP671 = false;
                 TxPower.setVisibility(View.VISIBLE);
                 TxPowerDivider.setVisibility(View.VISIBLE);
-            } else {
+                txPowerlist = Arrays.asList(getResources().getStringArray(R.array.txpower_table));
+                intervalSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, txPowerlist);
+                TxPower.spinnerInit(intervalSpinnerAdapter, txPowerlist);
+            } else if ("25".equals(moduleString)) {//BP109
+                isModule_BP109 = true;
+                isModule_BP101 = false;
+                isModule_BP671 = false;
                 TxPower.setVisibility(View.GONE);
                 TxPowerDivider.setVisibility(View.GONE);
+            } else if ("30".equals(moduleString)) {//BP101
+                isModule_BP109 = false;
+                isModule_BP671 = false;
+                isModule_BP101 = true;
+                TxPower.setVisibility(View.VISIBLE);
+                TxPowerDivider.setVisibility(View.VISIBLE);
+                txPowerlist = Arrays.asList(getResources().getStringArray(R.array.BP101_txpower_table));
+                intervalSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, txPowerlist);
+                TxPower.spinnerInit(intervalSpinnerAdapter, txPowerlist);
+            } else if ("31".equals(moduleString)) {//BP671
+                isModule_BP109 = false;
+                isModule_BP671 = true;
+                isModule_BP101 = false;
+                TxPower.setVisibility(View.VISIBLE);
+                TxPowerDivider.setVisibility(View.VISIBLE);
+                txPowerlist = Arrays.asList(getResources().getStringArray(R.array.BP671_txpower_table));
+                intervalSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, txPowerlist);
+                TxPower.spinnerInit(intervalSpinnerAdapter, txPowerlist);
             }
             if (("unknow").equals(moduleString) || versionString.length() != 3) {
                 Connectable.setCheck(true);
@@ -179,7 +311,7 @@ public class ParameterSettingActivity extends BaseActivity {
                 /**
                  * connectable button does not appear if BLE password is used
                  */
-                if (FeasyBeacon.BLE_KEY_WAY.equals(encryptWay)) {
+                if (FeasyBeacon.BLE_KEY_WAY.equals(encryptWay.substring(1))) {
                     Connectable.setVisibility(View.GONE);
                     ConnectableDivider.setVisibility(View.GONE);
                 } else {
@@ -189,12 +321,54 @@ public class ParameterSettingActivity extends BaseActivity {
                 Connectable.setCheck(device.getFeasyBeacon().isConnectable());
             }
 
-            if (FeasyBeacon.BLE_KEY_WAY.equals(encryptWay)) {
+            if (FeasyBeacon.BLE_KEY_WAY.equals(encryptWay.substring(1))) {
                 PIN.setVisibility(View.VISIBLE);
                 PINDivider.setVisibility(View.VISIBLE);
             } else {
                 PIN.setVisibility(View.GONE);
                 PINDivider.setVisibility(View.GONE);
+            }
+        } else {
+            // Log.e("ParameterSetting", "为null");
+        }
+    }
+
+    private static final String TAG = "ParameterSettingActivit";
+
+    public static void checkLength(String str, FeasyBeacon fb) {
+        String s = FeasycomUtil.checkLength(Integer.toBinaryString(Integer.valueOf(str.substring(0, 1), 16)), 4, true);
+        char[] c = s.toCharArray();
+        for (int i = 0; i < 4; i++) {
+            switch (i) {
+                case 0:
+                    if (c[i] == '0') {
+                        fb.setKeycfg(false);
+                    } else {
+                        fb.setKeycfg(true);
+                        // fb.setKeycfg(false);
+                    }
+                    break;
+                case 1:
+                    if (c[i] == '0') {
+                        fb.setGsensor(false);
+                    } else {
+                        fb.setGsensor(true);
+                    }
+                    break;
+                case 2:
+                    if (c[i] == '0') {
+                        fb.setBuzzer(false);
+                    } else {
+                        fb.setBuzzer(true);
+                    }
+                    break;
+                case 3:
+                    if (c[i] == '0') {
+                        fb.setLed(false);
+                    } else {
+                        fb.setLed(true);
+                    }
+                    break;
             }
         }
     }
@@ -204,25 +378,26 @@ public class ParameterSettingActivity extends BaseActivity {
         super.onResume();
         fscBeaconApi = FscBeaconApiImp.getInstance(activity);
         fscBeaconApi.initialize();
-        Name.setTextWacher(new ViewUtil.NameTextWatcher(Name, fscBeaconApi));
 
+        Name.setTextWacher(new ViewUtil.NameTextWatcher(Name, fscBeaconApi));
         Interval.setTextWacher(new ViewUtil.IntervalTextWatcher(Interval, fscBeaconApi));
         PIN.setTextWacher(new ViewUtil.PinTextWatcher(PIN, fscBeaconApi));
         ExtEnd.setTextWacher(new ViewUtil.ExtendTextWatcher(ExtEnd, fscBeaconApi));
+        Gsensor.setTextWacher(new ViewUtil.GsensorTextWatcher(Gsensor, fscBeaconApi));
+        Keycfg.setTextWacher(new ViewUtil.KeyTextWatcher(Keycfg, fscBeaconApi));
         initView();
-        if(OPEN_TEST_MODE){
+        if (OPEN_TEST_MODE) {
             connectAndGetInfomation();
-        }else{
+        } else {
             if (!fscBeaconApi.isConnected()) {
                 if (null == device.getFeasyBeacon()
-                        || FeasyBeaconUtil.updateDetermine(device.getFeasyBeacon().getVersion(), device.getFeasyBeacon().getmodule())) {
+                        || FeasyBeaconUtil.updateDetermine(device.getFeasyBeacon().getVersion(), device.getFeasyBeacon().getModule())) {
                     otaDetermineDialog.show();
                 } else {
                     connectAndGetInfomation();
                 }
             }
         }
-
     }
 
     @Override
@@ -244,10 +419,12 @@ public class ParameterSettingActivity extends BaseActivity {
         Connectable.setOnToggleChanged(new ToggleButton.OnToggleChanged() {
             @Override
             public void onToggle(boolean on) {
+                Log.e(TAG, "onToggle: **********" );
                 fscBeaconApi.setConnectable(on);
             }
         });
-        fscBeaconApi.setCallbacks(new FscBeaconCallbacksImpParameter(new WeakReference<ParameterSettingActivity>((ParameterSettingActivity) activity), fscBeaconApi, moduleString));
+        Log.e(TAG, "initView: **********" );
+        fscBeaconApi.setCallbacks(new FscBeaconCallbacksImpParameter(new WeakReference<ParameterSettingActivity>((ParameterSettingActivity) activity), fscBeaconApi, moduleString, device.getFeasyBeacon()));
     }
 
     @Override
@@ -256,6 +433,7 @@ public class ParameterSettingActivity extends BaseActivity {
                 && event.getRepeatCount() == 0) {
             fscBeaconApi.disconnect();
             SetActivity.actionStart(activity);
+            Log.e(TAG, "onKeyDown: 1" );
             finishActivity();
         }
         return true;
@@ -273,9 +451,11 @@ public class ParameterSettingActivity extends BaseActivity {
         /**
          * footer image src init
          */
+        /*
         SetButton.setImageResource(R.drawable.setting_on);
         AboutButton.setImageResource(R.drawable.about_off);
         SearchButton.setImageResource(R.drawable.search_off);
+        */
     }
 
     @Override
@@ -308,6 +488,7 @@ public class ParameterSettingActivity extends BaseActivity {
                 break;
             case BaseEvent.OTA_EVENT_YES:
                 UpgradeActivity.actionStart(activity, device, pin2Connect);
+                Log.e(TAG, "onEventMainThread: 2" );
                 finishActivity();
                 break;
             case BaseEvent.OTA_EVENT_NO:
@@ -322,42 +503,89 @@ public class ParameterSettingActivity extends BaseActivity {
         startActivityForResult(intent, REQUEST_BEACON_ADD);
     }
 
-    @OnClick(R.id.Set_Button)
+    //@OnClick(R.id.Set_Button)
     public void setClick() {
     }
 
-    @OnClick(R.id.About_Button)
+    //@OnClick(R.id.About_Button)
     public void aboutClick() {
         fscBeaconApi.disconnect();
         AboutActivity.actionStart(activity);
+        Log.e(TAG, "aboutClick: 3" );
         finishActivity();
     }
 
-    @OnClick(R.id.Search_Button)
+    //@OnClick(R.id.Search_Button)
     public void searchClick() {
         fscBeaconApi.disconnect();
         MainActivity.actionStart(activity);
+        Log.e(TAG, "searchClick: 4" );
+        finishActivity();
+    }
+
+    @Override
+    public void sensorClick() {
+        fscBeaconApi.disconnect();
+        SensorActivity.actionStart(activity);
+        Log.e(TAG, "sensorClick: 5" );
         finishActivity();
     }
 
     @OnClick(R.id.header_left)
     public void goBack() {
+        back = true;
         fscBeaconApi.disconnect();
+       /* Log.e(TAG, "goBack: " );
         SetActivity.actionStart(activity);
-        finishActivity();
+        finishActivity();*/
     }
 
     @OnClick(R.id.header_right)
     public void save() {
-        connectDialog.setInfo("save...");
-        connectDialog.show();
-        fscBeaconApi.saveBeaconInfo();
+        if (!IntervalSpinnerView.verify) {
+            AlertDialog alertDialog2 = new AlertDialog.Builder(this)
+                    .setTitle("ERROR")
+                    .setMessage("Interval,Gsonser and Key cannot be \"Zero\" at the same time")
+                    .setIcon(R.mipmap.ic_launcher)
+                    .setNegativeButton(" cancel", new DialogInterface.OnClickListener() {//添加取消
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .create();
+            alertDialog2.show();
+        } else if (!(KeycfgSpinnerView.keycfgSend || GsensorSpinnerView.gsensorSend) && IntervalSpinnerView.position > 11) {
+            AlertDialog alertDialog2 = new AlertDialog.Builder(this)
+                    .setTitle("ERROR")
+                    .setMessage("Interval ,G-Sensor and Key , at least one value :0<X≤2\n")
+                    .setIcon(R.mipmap.ic_launcher)
+                    .setNegativeButton(" cancel", new DialogInterface.OnClickListener() {//添加取消
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                        }
+                    })
+                    .create();
+            alertDialog2.show();
+        } else {
+            if (fscBeaconApi.isConnected()) {
+                connectDialog.setInfo("save...");
+                connectDialog.show();
+                fscBeaconApi.saveBeaconInfo();
+            } else {
+                return;
+            }
+        }
+
     }
+
+    FscBeaconCallbacksImp fscBeaconCallbacks = new FscBeaconCallbacksImp();
 
     Runnable checkConnect = new Runnable() {
         @Override
         public void run() {
-            if (!fscBeaconApi.isConnected() && ("connecting...".equals(connectDialog.getInfo()))) {
+            if (!fscBeaconApi.isConnected() && (("connecting...".equals(connectDialog.getInfo()))
+                    || ("check password...".equals(connectDialog.getInfo())))) {
                 fscBeaconApi.setCallbacks(null);
                 connectDialog.setInfo("timeout");
                 connectFailedHandler();
@@ -365,24 +593,36 @@ public class ParameterSettingActivity extends BaseActivity {
         }
     };
 
+
     public void connectFailedHandler() {
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                connectDialog.dismiss();
-                fscBeaconApi.disconnect();
-                SetActivity.actionStart(activity);
-//                Log.i("finish", "2");
-                finishActivity();
-            }
-        }, InfoDialog.INFO_DIAOLOG_SHOW_TIME);
+        if(back){
+            SetActivity.actionStart(activity);
+            Log.e(TAG, "connectFailedHandler: 6" );
+            finishActivity();
+        }else{
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    connectDialog.dismiss();
+                    fscBeaconApi.disconnect();
+                    Log.e(TAG, "保存后的页面跳转 " );
+                    SetActivity.actionStart(activity);
+                    finishActivity();
+                }
+            }, InfoDialog.INFO_DIAOLOG_SHOW_TIME);
+        }
     }
 
     private void connectAndGetInfomation() {
         connectDialog.show();
         handler.postDelayed(checkConnect, CHECK_CONNECT_TIME);
         fscBeaconApi.connect(device, pin2Connect);
+        Log.e(TAG, "connectAndGetInfomation: " + device.getAddress() + "   " + pin2Connect );
         TOTAL_COUNT++;
+    }
+
+    public void setConnectDialog() {
+        connectDialog.show();
     }
 
     // enable to add beacon button
@@ -440,6 +680,11 @@ public class ParameterSettingActivity extends BaseActivity {
         return PIN;
     }
 
+    public IntervalSpinnerView getAdvInterval() {
+        return adv_interval;
+    }
+
+
     public LableSpinnerView getTxPower() {
         return TxPower;
     }
@@ -450,6 +695,14 @@ public class ParameterSettingActivity extends BaseActivity {
 
     public LableEditView getVersion() {
         return Version;
+    }
+
+    public GsensorSpinnerView getGsensor() {
+        return adv_gsensor;
+    }
+
+    public KeycfgSpinnerView getKeycfg() {
+        return adv_keycfg;
     }
 
     public LableEditView getModule() {
@@ -483,4 +736,7 @@ public class ParameterSettingActivity extends BaseActivity {
     public FscBeaconApi getFscBeaconApi() {
         return fscBeaconApi;
     }
+
+
+
 }

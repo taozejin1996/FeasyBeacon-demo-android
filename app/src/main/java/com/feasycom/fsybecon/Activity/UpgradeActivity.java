@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -200,7 +201,7 @@ public class UpgradeActivity extends BaseActivity {
             if (typeNumber[i].equals(currentModuleNumberString)) {
                 fileByte = FileUtil.hexToByte(dfuFile[i]);
                 otaFileName.setText(dfuFileName[i]);
-                exceptModule.setText(FeasyBeaconUtil.getModleByFileName(dfuFileName[i]));
+                exceptModule.setText(FeasyBeaconUtil.getModelByFileName(dfuFileName[i]));
                 exceptVersion.setText(FeasyBeaconUtil.getVersionByFileName(dfuFileName[i]));
             }
         }
@@ -210,6 +211,8 @@ public class UpgradeActivity extends BaseActivity {
     @OnCheckedChanged(R.id.reset)
     public void restCheck(boolean check) {
     }
+
+    
 
     @OnClick(R.id.startOTA)
     public void startOTA() {
@@ -272,10 +275,18 @@ public class UpgradeActivity extends BaseActivity {
         MainActivity.actionStart(activity);
         finishActivity();
     }
+    @OnClick(R.id.Sensor_Button)
+    @Override
+    public void sensorClick() {
+        SensorActivity.actionStart(activity);
+        finishActivity();
+    }
 
+    private static final String TAG = "UpgradeActivity";
     Runnable goBackRunnable = new Runnable() {
         @Override
         public void run() {
+            Log.e(TAG, "run: ");
             SetActivity.actionStart(activity);
             finishActivity();
         }

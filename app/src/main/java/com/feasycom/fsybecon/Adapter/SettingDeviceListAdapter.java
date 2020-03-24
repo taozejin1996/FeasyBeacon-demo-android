@@ -1,6 +1,7 @@
 package com.feasycom.fsybecon.Adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,16 +47,89 @@ public class SettingDeviceListAdapter extends BaseAdapter {
         return mDevices.get(position);
     }
 
+    private static final String TAG = "SettingDeviceListAdapte";
     synchronized public void addDevice(BluetoothDeviceWrapper deviceDetail) {
         if(deviceDetail == null){
             return;
         }
+        else {
+            if(null != deviceDetail.getFeasyBeacon()) {
+                int i = 0;
+                for (; i < mDevices.size(); i++) {
+                    if (deviceDetail.getAddress().equals(mDevices.get(i).getAddress())) {
+                        mDevices.get(i).setCompleteLocalName(deviceDetail.getCompleteLocalName());
+                        mDevices.get(i).setName(deviceDetail.getName());
+                        mDevices.get(i).setRssi(deviceDetail.getRssi());
+
+                        if (null != deviceDetail.getiBeacon()) {
+                            mDevices.get(i).setiBeacon(deviceDetail.getiBeacon());
+                        } else {
+                            mDevices.get(i).setiBeacon(null);
+                        }
+                        if (null != deviceDetail.getgBeacon()) {
+                            mDevices.get(i).setgBeacon(deviceDetail.getgBeacon());
+                        } else {
+                            mDevices.get(i).setgBeacon(null);
+                        }
+                        if (null != deviceDetail.getFeasyBeacon()) {
+                            mDevices.get(i).setFeasyBeacon(deviceDetail.getFeasyBeacon());
+                        } else {
+                            mDevices.get(i).setFeasyBeacon(null);
+                        }
+
+                        break;
+                    }
+                }
+                if (i >= mDevices.size()) {
+                    mDevices.add(deviceDetail);
+                }
+                /*if(("21".equals(deviceDetail.getFeasyBeacon().getmodule()) || "25".equals(deviceDetail.getFeasyBeacon().getmodule()) || "26".equals(deviceDetail.getFeasyBeacon().getmodule())
+                        || "27".equals(deviceDetail.getFeasyBeacon().getmodule()) || "28".equals(deviceDetail.getFeasyBeacon().getmodule())
+                || "29".equals(deviceDetail.getFeasyBeacon().getmodule())
+                        || "30".equals(deviceDetail.getFeasyBeacon().getmodule())
+                        ||"34".equals(deviceDetail.getFeasyBeacon().getmodule())
+                        ||"35".equals(deviceDetail.getFeasyBeacon().getmodule())
+                    || "31".equals(deviceDetail.getFeasyBeacon().getmodule())) && (deviceDetail.getRssi() >= -80)){
+                    int i = 0;
+                    for (; i < mDevices.size(); i++) {
+                        if (deviceDetail.getAddress().equals(mDevices.get(i).getAddress())) {
+                            mDevices.get(i).setCompleteLocalName(deviceDetail.getCompleteLocalName());
+                            mDevices.get(i).setName(deviceDetail.getName());
+                            mDevices.get(i).setRssi(deviceDetail.getRssi());
+
+                            if (null != deviceDetail.getiBeacon()) {
+                                mDevices.get(i).setiBeacon(deviceDetail.getiBeacon());
+                            } else {
+                                mDevices.get(i).setiBeacon(null);
+                            }
+                            if (null != deviceDetail.getgBeacon()) {
+                                mDevices.get(i).setgBeacon(deviceDetail.getgBeacon());
+                            } else {
+                                mDevices.get(i).setgBeacon(null);
+                            }
+                            if (null != deviceDetail.getFeasyBeacon()) {
+                                mDevices.get(i).setFeasyBeacon(deviceDetail.getFeasyBeacon());
+                            } else {
+                                mDevices.get(i).setFeasyBeacon(null);
+                            }
+
+                            break;
+                        }
+                    }
+                    if (i >= mDevices.size()) {
+                        mDevices.add(deviceDetail);
+                    }
+                }*/
+            }
+        }
+/*
         int i = 0;
         for (; i < mDevices.size(); i++) {
             if (deviceDetail.getAddress().equals(mDevices.get(i).getAddress())) {
                 mDevices.get(i).setCompleteLocalName(deviceDetail.getCompleteLocalName());
                 mDevices.get(i).setName(deviceDetail.getName());
                 mDevices.get(i).setRssi(deviceDetail.getRssi());
+
                 if (null != deviceDetail.getiBeacon()) {
                     mDevices.get(i).setiBeacon(deviceDetail.getiBeacon());
                 } else {
@@ -71,13 +145,26 @@ public class SettingDeviceListAdapter extends BaseAdapter {
                 } else {
                     mDevices.get(i).setFeasyBeacon(null);
                 }
+
                 break;
             }
         }
         if (i >= mDevices.size()) {
             mDevices.add(deviceDetail);
         }
+*/
+    }
 
+    public void sort() {
+        for (int i=0; i < mDevices.size() - 1; i++) {
+            for (int j = 0; j < mDevices.size() - 1 - i; j++) {
+                if(mDevices.get(j).getRssi() < mDevices.get(j + 1).getRssi()) {
+                    BluetoothDeviceWrapper bd = mDevices.get(j);
+                    mDevices.set(j, mDevices.get(j + 1));
+                    mDevices.set(j + 1, bd);
+                }
+            }
+        }
     }
 
     public void clearList() {
@@ -109,7 +196,7 @@ public class SettingDeviceListAdapter extends BaseAdapter {
         String deviceAdd = deviceDetail.getAddress();
         int deviceRssi = deviceDetail.getRssi().intValue();
         if((completeName != null) && completeName.length()>0){
-            viewHolder.tvName.setText(completeName);
+            viewHolder.tvName.setText(completeName+"-"+deviceAdd.substring(9,11)+deviceAdd.substring(12,14)+deviceAdd.substring(15,17));
         }else if ((deviceName != null) && deviceName.length() > 0) {
             viewHolder.tvName.setText(deviceName);
         } else {
@@ -133,6 +220,7 @@ public class SettingDeviceListAdapter extends BaseAdapter {
         }
         viewHolder.pbRssi.setProgress(100 + deviceRssi);
         viewHolder.tvRssi.setText("RSSI:" + deviceDetail.getRssi().toString());
+        /*
         if (null != deviceDetail.getFeasyBeacon()) {
             if (null == deviceDetail.getFeasyBeacon().getBattery()) {
                 viewHolder.chargePic.setImageResource(R.drawable.charging);
@@ -156,6 +244,56 @@ public class SettingDeviceListAdapter extends BaseAdapter {
         } else {
             viewHolder.chargePic.setImageResource(R.drawable.charging);
         }
+        */
+        if (null != deviceDetail.getFeasyBeacon()) {
+            if (null == deviceDetail.getFeasyBeacon().getBattery()) {
+                viewHolder.chargePic.setImageResource(R.drawable.electric_quantity_charging);
+                viewHolder.chargeValue.setText("100%");
+            } else {
+                int battry = Integer.valueOf(deviceDetail.getFeasyBeacon().getBattery()).intValue();
+                if (battry > 100) {
+                    viewHolder.chargePic.setImageResource(R.drawable.electric_quantity_charging);
+                    viewHolder.chargeValue.setText("100%");
+                } else if (battry == 0){
+                    viewHolder.chargePic.setImageResource(R.drawable.electric_quantity0);
+                    viewHolder.chargeValue.setText("0%");
+                } else if (battry > 0 && battry < 10){
+                    viewHolder.chargePic.setImageResource(R.drawable.electric_quantity10);
+                    viewHolder.chargeValue.setText(Integer.toString(battry)+"%");
+                } else if (battry >= 10 && battry < 20){
+                    viewHolder.chargePic.setImageResource(R.drawable.electric_quantity20);
+                    viewHolder.chargeValue.setText(Integer.toString(battry)+"%");
+                } else if (battry >= 20 && battry < 30){
+                    viewHolder.chargePic.setImageResource(R.drawable.electric_quantity30);
+                    viewHolder.chargeValue.setText(Integer.toString(battry)+"%");
+                } else if (battry >= 30 && battry < 40) {
+                    viewHolder.chargePic.setImageResource(R.drawable.electric_quantity40);
+                    viewHolder.chargeValue.setText(Integer.toString(battry)+"%");
+                } else if (battry >= 40 && battry < 50) {
+                    viewHolder.chargePic.setImageResource(R.drawable.electric_quantity50);
+                    viewHolder.chargeValue.setText(Integer.toString(battry)+"%");
+                } else if (battry >= 50 && battry < 60) {
+                    viewHolder.chargePic.setImageResource(R.drawable.electric_quantity60);
+                    viewHolder.chargeValue.setText(Integer.toString(battry)+"%");
+                } else if (battry >= 60 && battry < 70) {
+                    viewHolder.chargePic.setImageResource(R.drawable.electric_quantity70);
+                    viewHolder.chargeValue.setText(Integer.toString(battry)+"%");
+                } else if (battry >= 70 && battry < 80) {
+                    viewHolder.chargePic.setImageResource(R.drawable.electric_quantity80);
+                    viewHolder.chargeValue.setText(Integer.toString(battry)+"%");
+                } else if (battry >= 80 && battry < 90) {
+                    viewHolder.chargePic.setImageResource(R.drawable.electric_quantity90);
+                    viewHolder.chargeValue.setText(Integer.toString(battry)+"%");
+                } else if (battry >= 90 && battry <= 100) {
+                    viewHolder.chargePic.setImageResource(R.drawable.electric_quantity100);
+                    viewHolder.chargeValue.setText(Integer.toString(battry)+"%");
+                }
+            }
+
+        } else {
+            viewHolder.chargePic.setImageResource(R.drawable.electric_quantity_charging);
+            viewHolder.chargeValue.setText("100%");
+        }
         return view;
     }
 
@@ -166,6 +304,8 @@ public class SettingDeviceListAdapter extends BaseAdapter {
         TextView tvName;
         @BindView(R.id.charge_pic)
         ImageView chargePic;
+        @BindView(R.id.charge_value)
+        TextView chargeValue;
         @BindView(R.id.tv_addr)
         TextView tvAddr;
         @BindView(R.id.tv_rssi)

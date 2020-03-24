@@ -2,22 +2,33 @@ package com.feasycom.fsybecon.Controler;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.content.Context;
+import android.util.EventLogTags;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.feasycom.bean.BeaconBean;
 import com.feasycom.bean.CommandBean;
 import com.feasycom.bean.FeasyBeacon;
 import com.feasycom.controler.FscBeaconApi;
 import com.feasycom.controler.FscBeaconCallbacksImp;
+import com.feasycom.controler.FscBleCentralApi;
+import com.feasycom.controler.FscBleCentralApiImp;
 import com.feasycom.fsybecon.Activity.MainActivity;
 import com.feasycom.fsybecon.Activity.ParameterSettingActivity;
 import com.feasycom.fsybecon.Activity.SetActivity;
 import com.feasycom.fsybecon.Widget.InfoDialog;
 import com.feasycom.util.LogUtil;
+import com.feasycom.util.ToastUtil;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
+import static com.feasycom.fsybecon.Activity.ParameterSettingActivity.isModule_BP101;
+import static com.feasycom.fsybecon.Activity.ParameterSettingActivity.isModule_BP671;
 import static com.feasycom.fsybecon.Activity.SetActivity.OPEN_TEST_MODE;
 import static com.feasycom.fsybecon.Activity.ParameterSettingActivity.SUCESSFUL_COUNT;
 
@@ -30,18 +41,25 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
     private WeakReference<ParameterSettingActivity> parameterSettingActivityWeakReference;
     private FscBeaconApi fscBeaconApi;
     private String moduleString;
+    private FeasyBeacon fb;
+    private FscBleCentralApi fscBleCentralApi = FscBleCentralApiImp.getInstance();
+    private CommandBean commandBean = new CommandBean();
 
-    public FscBeaconCallbacksImpParameter(WeakReference<ParameterSettingActivity> parameterSettingActivityWeakReference, FscBeaconApi fscBeaconApi, String moduleString) {
+    public static boolean state = false;
+
+    public FscBeaconCallbacksImpParameter(WeakReference<ParameterSettingActivity> parameterSettingActivityWeakReference, FscBeaconApi fscBeaconApi, String moduleString, FeasyBeacon fb) {
         this.parameterSettingActivityWeakReference = parameterSettingActivityWeakReference;
         this.fscBeaconApi = fscBeaconApi;
         this.moduleString = moduleString;
+        this.fb = fb;
     }
 
     @Override
     public void blePeripheralConnected(BluetoothGatt gatt, BluetoothDevice device) {
-        if (parameterSettingActivityWeakReference.get().getPin2Connect() == null) {
-            fscBeaconApi.startGetDeviceInfo(moduleString);
-        }
+       /* if (parameterSettingActivityWeakReference.get().getPin2Connect() == null) {
+            fscBeaconApi.startGetDeviceInfo(moduleString, fb);
+
+        }*/
         SUCESSFUL_COUNT++;
     }
 
@@ -51,18 +69,32 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
             return;
         }
         if (status == CommandBean.PASSWORD_CHECK) {
+            Log.e(TAG, "connectProgressUpdate: check password" );
             parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("check password...");
         } else if (status == CommandBean.PASSWORD_SUCCESSFULE) {
+            Log.e(TAG, "connectProgressUpdate: password sucessful" );
             parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("password sucessful...");
-            fscBeaconApi.startGetDeviceInfo(moduleString);
+            fscBeaconApi.startGetDeviceInfo(moduleString, fb);
         } else if (status == CommandBean.PASSWORD_FAILED) {
+            Log.e(TAG, "connectProgressUpdate: password failed" );
             parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("password failed...");
             parameterSettingActivityWeakReference.get().connectFailedHandler();
         } else if (status == CommandBean.PASSWORD_TIME_OUT) {
+            Log.e(TAG, "connectProgressUpdate: timeout" );
             parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("timeout");
             parameterSettingActivityWeakReference.get().connectFailedHandler();
         }
+    }
 
+
+    @Override
+    public void blePeripheralDisonnected(BluetoothGatt gatt, BluetoothDevice device) {
+        if (parameterSettingActivityWeakReference.get() == null) {
+            return;
+        }
+        ToastUtil.show(parameterSettingActivityWeakReference.get(), "disconnect!");
+        state = false;
+        parameterSettingActivityWeakReference.get().connectFailedHandler();
     }
 
     @Override
@@ -70,6 +102,7 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
         if (parameterSettingActivityWeakReference.get() == null) {
             return;
         }
+        // Log.e("atCommandCallBack",command+"");
         /**
          * get module information and save module information are through the AT command to configure
          * after saving the module information you can do something
@@ -83,12 +116,14 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
             parameterSettingActivityWeakReference.get().getHandler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    parameterSettingActivityWeakReference.get().getConnectDialog().dismiss();
-                    if (OPEN_TEST_MODE) {
+                    if (parameterSettingActivityWeakReference.get().getConnectDialog().isShowing()) {
+                        parameterSettingActivityWeakReference.get().getConnectDialog().dismiss();
+                    }
+                  /* if (OPEN_TEST_MODE) {
                         SetActivity.actionStart(parameterSettingActivityWeakReference.get().getActivity());
                     } else {
                         MainActivity.actionStart(parameterSettingActivityWeakReference.get().getActivity());
-                    }
+                    }*/
                     parameterSettingActivityWeakReference.get().finishActivity();
                     Log.i("finish", "1");
                 }
@@ -117,9 +152,10 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
         }
 
         if (CommandBean.COMMAND_FINISH.equals(status) && "connected".equals(parameterSettingActivityWeakReference.get().getConnectDialog().getInfo())) {
+            // fscBeaconApi.setBuzzer(true);
             parameterSettingActivityWeakReference.get().getConnectDialog().dismiss();
             parameterSettingActivityWeakReference.get().getHandler().removeCallbacks(parameterSettingActivityWeakReference.get().getCheckConnect());
-            if(OPEN_TEST_MODE){
+            if (OPEN_TEST_MODE) {
                 parameterSettingActivityWeakReference.get().getHandler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -147,15 +183,16 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
         }
     }
 
+    private static final String TAG = "FscBeaconCallbacksImpPa";
 
     @Override
     public void deviceInfo(final String parameterName, final Object parameter) {
         if (parameterSettingActivityWeakReference.get() == null) {
             return;
         }
-        Log.i("device", parameterName);
         if (CommandBean.COMMAND_BEGIN.equals(parameterName)) {
             parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("connected");
+            // fscBeaconApi.setBuzzer(true);`
         } else if (CommandBean.COMMAND_MODEL.equals(parameterName)) {
             parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
                 @Override
@@ -171,6 +208,7 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
                 }
             });
         } else if (CommandBean.COMMAND_NAME.equals(parameterName)) {
+            Log.e(TAG, "deviceInfo: " + (String) parameter);
             parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -178,13 +216,217 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
                 }
             });
         } else if (CommandBean.COMMAND_ADVIN.equals(parameterName)) {
-            Log.i("advin", (String) parameter);
+            Integer data = Integer.valueOf((String) parameter);
+            Log.e(TAG, "deviceInfo: " + data);
+            parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (fb.getGsensor() || fb.getKeycfg()) {
+                        if (Integer.parseInt((String) parameter) == 0) {                                                                    //100ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(0);
+                        } else if (Integer.parseInt((String) parameter) == 100) {                                                            //100ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(1);
+                        } else if (Integer.parseInt((String) parameter) >= 100 && Integer.parseInt((String) parameter) <= 199) {             //152ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(2);
+                        } else if (Integer.parseInt((String) parameter) >= 200 && Integer.parseInt((String) parameter) <= 299) {             //211ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(3);
+                        } else if (Integer.parseInt((String) parameter) >= 300 && Integer.parseInt((String) parameter) <= 399) {             //318ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(4);
+                        } else if (Integer.parseInt((String) parameter) >= 400 && Integer.parseInt((String) parameter) <= 499) {             //417ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(5);
+                        } else if (Integer.parseInt((String) parameter) >= 500 && Integer.parseInt((String) parameter) <= 599) {             //546ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(6);
+                        } else if (Integer.parseInt((String) parameter) >= 600 && Integer.parseInt((String) parameter) <= 799) {             //760ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(7);
+                        } else if (Integer.parseInt((String) parameter) >= 800 && Integer.parseInt((String) parameter) <= 899) {             //852ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(8);
+                        } else if (Integer.parseInt((String) parameter) >= 900 && Integer.parseInt((String) parameter) <= 1099) {            //1022ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(9);
+                        } else if (Integer.parseInt((String) parameter) >= 1100 && Integer.parseInt((String) parameter) <= 1499) {           //1280ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(10);
+                        } else if (Integer.parseInt((String) parameter) >= 1499 && Integer.parseInt((String) parameter) <= 2000) {
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(11);        //2000ms
+                        } else if (Integer.parseInt((String) parameter) > 2000 && Integer.parseInt((String) parameter) <= 3000) {
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(12);        //2000ms
+                        } else if (Integer.parseInt((String) parameter) > 3000 && Integer.parseInt((String) parameter) <= 4000) {
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(13);        //2000ms
+                        } else if (Integer.parseInt((String) parameter) > 4000 && Integer.parseInt((String) parameter) <= 5000) {
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(14);        //2000ms
+                        } else if (Integer.parseInt((String) parameter) > 5000 && Integer.parseInt((String) parameter) <= 6000) {
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(15);        //2000ms
+                        } else if (Integer.parseInt((String) parameter) > 6000 && Integer.parseInt((String) parameter) <= 7000) {
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(16);        //2000ms
+                        } else if (Integer.parseInt((String) parameter) > 7000 && Integer.parseInt((String) parameter) <= 8000) {
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(17);        //2000ms
+                        } else if (Integer.parseInt((String) parameter) > 8000 && Integer.parseInt((String) parameter) <= 9000) {
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(18);        //2000ms
+                        } else if (Integer.parseInt((String) parameter) > 9000) {
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(19);        //2000ms
+                        }
+                    } else {
+                        if (Integer.parseInt((String) parameter) == 100) {             //152ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(0);
+                        } else if (Integer.parseInt((String) parameter) >= 100 && Integer.parseInt((String) parameter) <= 199) {             //152ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(1);
+                        } else if (Integer.parseInt((String) parameter) >= 200 && Integer.parseInt((String) parameter) <= 299) {             //211ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(2);
+                        } else if (Integer.parseInt((String) parameter) >= 300 && Integer.parseInt((String) parameter) <= 399) {             //318ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(3);
+                        } else if (Integer.parseInt((String) parameter) >= 400 && Integer.parseInt((String) parameter) <= 499) {             //417ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(4);
+                        } else if (Integer.parseInt((String) parameter) >= 500 && Integer.parseInt((String) parameter) <= 599) {             //546ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(5);
+                        } else if (Integer.parseInt((String) parameter) >= 600 && Integer.parseInt((String) parameter) <= 799) {             //760ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(6);
+                        } else if (Integer.parseInt((String) parameter) >= 800 && Integer.parseInt((String) parameter) <= 899) {             //852ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(7);
+                        } else if (Integer.parseInt((String) parameter) >= 900 && Integer.parseInt((String) parameter) <= 1099) {            //1022ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(8);
+                        } else if (Integer.parseInt((String) parameter) >= 1100 && Integer.parseInt((String) parameter) <= 1499) {           //1280ms
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(9);
+                        } else if (Integer.parseInt((String) parameter) >= 1499) {
+                            parameterSettingActivityWeakReference.get().getAdvInterval().setSelect(10);        //2000ms
+                        }
+                    }
+
+                }
+            });
+
+            /*
             parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     parameterSettingActivityWeakReference.get().getInterval().setText((String) parameter, true);
                 }
             });
+            */
+        } else if (CommandBean.COMMAND_KEYCFG.equals(parameterName)) {
+            String[] s = (String[]) parameter;
+            parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+
+                    if (Integer.parseInt(s[0]) == 0) {                                                      //0ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setAdvinSelect(0);
+                    } else if (Integer.parseInt(s[0]) == 100) {                                              //100ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setAdvinSelect(1);
+                    } else if (Integer.parseInt(s[0]) > 100 && Integer.parseInt(s[0]) <= 160) {             //152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setAdvinSelect(2);
+                    } else if (Integer.parseInt(s[0]) > 160 && Integer.parseInt(s[0]) <= 220) {             //211ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setAdvinSelect(3);
+                    } else if (Integer.parseInt(s[0]) > 220 && Integer.parseInt(s[0]) <= 350) {             //318ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setAdvinSelect(4);
+                    } else if (Integer.parseInt(s[0]) > 350 && Integer.parseInt(s[0]) <= 450) {             //417ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setAdvinSelect(5);
+                    } else if (Integer.parseInt(s[0]) > 450 && Integer.parseInt(s[0]) <= 600) {             //546ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setAdvinSelect(6);
+                    } else if (Integer.parseInt(s[0]) > 600 && Integer.parseInt(s[0]) <= 800) {             //760ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setAdvinSelect(7);
+                    } else if (Integer.parseInt(s[0]) > 800 && Integer.parseInt(s[0]) <= 900) {             //852ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setAdvinSelect(8);
+                    } else if (Integer.parseInt(s[0]) > 900 && Integer.parseInt(s[0]) <= 1100) {            //1022ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setAdvinSelect(9);
+                    } else if (Integer.parseInt(s[0]) > 1100 && Integer.parseInt(s[0]) <= 1300) {           //1280ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setAdvinSelect(10);
+                    } else if (Integer.parseInt(s[0]) > 1300 && Integer.parseInt(s[0]) <= 2000) {
+                        parameterSettingActivityWeakReference.get().getKeycfg().setAdvinSelect(11);        //2000ms
+                    }
+
+                    if (Integer.parseInt(s[1]) >= 1000 && Integer.parseInt(s[1]) <= 4999) {//152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setDurationSelect(1);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 4999 && Integer.parseInt(s[1]) <= 9999) {//152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setDurationSelect(2);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 10000 && Integer.parseInt(s[1]) <= 14999) {//152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setDurationSelect(3);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 15000 && Integer.parseInt(s[1]) <= 19999) {//152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setDurationSelect(4);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 20000 && Integer.parseInt(s[1]) <= 24999) {//152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setDurationSelect(5);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 25000 && Integer.parseInt(s[1]) <= 29999) {//152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setDurationSelect(6);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 30000 && Integer.parseInt(s[1]) <= 34999) {//152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setDurationSelect(7);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 35000 && Integer.parseInt(s[1]) <= 39999) {//152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setDurationSelect(8);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 40000 && Integer.parseInt(s[1]) <= 44999) {//152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setDurationSelect(9);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 45000 && Integer.parseInt(s[1]) <= 49999) {//152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setDurationSelect(10);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 50000 && Integer.parseInt(s[1]) <= 54999) {//152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setDurationSelect(11);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 55000 && Integer.parseInt(s[1]) <= 59999) {//152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setDurationSelect(12);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 60000) {//152ms
+                        parameterSettingActivityWeakReference.get().getKeycfg().setDurationSelect(13);//150ms
+                    }
+                }
+            });
+        } else if (CommandBean.COMMAND_GSCFG.equals(parameterName)) {
+            String[] s = (String[]) parameter;
+            parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+
+                    if (Integer.parseInt(s[0]) == 0) {                                                      //0ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setAdvinSelect(0);
+                    } else if (Integer.parseInt(s[0]) > 0 && Integer.parseInt(s[0]) <= 100) {                //100ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setAdvinSelect(1);
+                    } else if (Integer.parseInt(s[0]) > 100 && Integer.parseInt(s[0]) <= 199) {             //152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setAdvinSelect(2);
+                    } else if (Integer.parseInt(s[0]) >= 200 && Integer.parseInt(s[0]) <= 299) {             //211ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setAdvinSelect(3);
+                    } else if (Integer.parseInt(s[0]) >= 300 && Integer.parseInt(s[0]) <= 399) {             //318ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setAdvinSelect(4);
+                    } else if (Integer.parseInt(s[0]) >= 400 && Integer.parseInt(s[0]) <= 499) {             //417ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setAdvinSelect(5);
+                    } else if (Integer.parseInt(s[0]) >= 500 && Integer.parseInt(s[0]) <= 599) {             //546ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setAdvinSelect(6);
+                    } else if (Integer.parseInt(s[0]) >= 600 && Integer.parseInt(s[0]) <= 799) {             //760ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setAdvinSelect(7);
+                    } else if (Integer.parseInt(s[0]) >= 800 && Integer.parseInt(s[0]) <= 899) {             //852ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setAdvinSelect(8);
+                    } else if (Integer.parseInt(s[0]) >= 900 && Integer.parseInt(s[0]) <= 1099) {            //1022ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setAdvinSelect(9);
+                    } else if (Integer.parseInt(s[0]) >= 1100 && Integer.parseInt(s[0]) <= 1599) {           //1280ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setAdvinSelect(10);
+                    } else if (Integer.parseInt(s[0]) >= 1599) {
+                        parameterSettingActivityWeakReference.get().getGsensor().setAdvinSelect(11);        //2000ms
+                    }
+
+                    if (Integer.parseInt(s[1]) >= 1000 && Integer.parseInt(s[1]) <= 4999) {//152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setDurationSelect(1);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 4999 && Integer.parseInt(s[1]) <= 9999) {//152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setDurationSelect(2);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 10000 && Integer.parseInt(s[1]) <= 14999) {//152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setDurationSelect(3);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 15000 && Integer.parseInt(s[1]) <= 19999) {//152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setDurationSelect(4);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 20000 && Integer.parseInt(s[1]) <= 24999) {//152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setDurationSelect(5);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 25000 && Integer.parseInt(s[1]) <= 29999) {//152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setDurationSelect(6);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 30000 && Integer.parseInt(s[1]) <= 34999) {//152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setDurationSelect(7);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 35000 && Integer.parseInt(s[1]) <= 39999) {//152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setDurationSelect(8);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 40000 && Integer.parseInt(s[1]) <= 44999) {//152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setDurationSelect(9);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 45000 && Integer.parseInt(s[1]) <= 49999) {//152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setDurationSelect(10);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 50000 && Integer.parseInt(s[1]) <= 54999) {//152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setDurationSelect(11);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 55000 && Integer.parseInt(s[1]) <= 59999) {//152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setDurationSelect(12);//150ms
+                    } else if (Integer.parseInt(s[1]) >= 60000) {//152ms
+                        parameterSettingActivityWeakReference.get().getGsensor().setDurationSelect(13);//150ms
+                    }
+                }
+            });
+        } else if (CommandBean.COMMAND_BUZ.equals(parameterName)) {
+
+        } else if (CommandBean.COMMAND_LED.equals(parameterName)) {
+
         } else if (CommandBean.COMMAND_BWMODE.equals(parameterName)) {
             /**
              * if use the password ,open the connectable directly
@@ -197,7 +439,6 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
                 parameterSettingActivityWeakReference.get().getConnectable().setCheck(false);
             }
         } else if (CommandBean.COMMAND_PIN.equals(parameterName)) {
-            Log.i("pin", "command call back");
             parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -219,17 +460,33 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
             });
         } else if (CommandBean.COMMAND_TX_POWER.equals(parameterName)) {
             parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
+
                 @Override
                 public void run() {
-                    parameterSettingActivityWeakReference.get().getTxPower().setSelect(Integer.valueOf((String) parameter).intValue() + 1);
+                    if (isModule_BP671 == true) {
+                        String BP671[] = {"-200", "-107", "-95", "-82", "-70", "-65", "-5", "30", "45", "53", "60", "71", "80", "92", "102", "110", "120", "130", "141", "150", "160", "170", "181", "190", "200"};
+                        for (int i = 0; i < BP671.length; i++) {
+                            if (BP671[i].equals((String) parameter)) {
+                                Log.e(TAG, "run: " + i);
+                                parameterSettingActivityWeakReference.get().getTxPower().setSelect(i + 1);
+                                break;
+                            }
+                        }
+                    } else {
+                        parameterSettingActivityWeakReference.get().getTxPower().setSelect(Integer.valueOf((String) parameter).intValue() + 1);
+                    }
                 }
             });
-        } else if (CommandBean.COMMAND_BADVDATA.equals(parameterName)) {
+        }
+        else if (CommandBean.COMMAND_BADVDATA.equals(parameterName)) {
             /**
              *  after each connection is successful SDK internal cache  broadcast information
              *  please ensure that your operation on the broadcast information is cached data for the SDK
              */
             parameterSettingActivityWeakReference.get().getAdapter().updateAllBeacon((ArrayList<BeaconBean>) parameter);
+            for (int i =0 ; i< ((ArrayList<BeaconBean>) parameter).size() -1 ; i++){
+                Log.e(TAG, "COMMAND_BADVDATA: " + ((ArrayList<BeaconBean>) parameter).get(i).getUrl() );
+            }
             parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -240,14 +497,15 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
                 }
             });
         } else if (CommandBean.COMMAND_EXTEND.equals(parameterName)) {
-            Log.i("extend", (String) parameter);
             parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     parameterSettingActivityWeakReference.get().getExtEnd().setText((String) parameter);
                 }
             });
-
         }
+        state = true;
+
     }
+
 }

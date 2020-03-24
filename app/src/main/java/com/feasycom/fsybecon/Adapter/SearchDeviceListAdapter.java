@@ -1,5 +1,6 @@
 package com.feasycom.fsybecon.Adapter;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
@@ -16,6 +17,9 @@ import com.feasycom.fsybecon.BeaconView.AltBeaconItem;
 import com.feasycom.fsybecon.BeaconView.EddystoneBeaconItem;
 import com.feasycom.fsybecon.BeaconView.IBeaconItem;
 import com.feasycom.fsybecon.R;
+import com.feasycom.fsybecon.Utils.SettingConfigUtil;
+import com.feasycom.fsybecon.Widget.InfoDialog;
+import com.feasycom.fsybecon.Widget.TipsDialog;
 
 import java.util.ArrayList;
 
@@ -29,6 +33,8 @@ import butterknife.ButterKnife;
 public class SearchDeviceListAdapter extends BaseAdapter {
     private LayoutInflater mInflator;
     private Context mContext;
+    TipsDialog tipsDialog;
+
     private ArrayList<BluetoothDeviceWrapper> mDevices = new ArrayList<BluetoothDeviceWrapper>();
 
     public SearchDeviceListAdapter(Context context, LayoutInflater Inflator) {
@@ -53,60 +59,61 @@ public class SearchDeviceListAdapter extends BaseAdapter {
         if (deviceDetail == null) {
             return false;
         }
-//        if(!deviceDetail.getAddress().equals("DC:0D:30:00:14:EA")){
-//            return;
-//        }
         int i = 0;
         for (; i < mDevices.size(); i++) {
             if (deviceDetail.getAddress().equals(mDevices.get(i).getAddress())) {
-//                Log.i("addr",deviceDetail.getAddress());
+                mDevices.get(i).setCompleteLocalName(deviceDetail.getCompleteLocalName());
+                mDevices.get(i).setName(deviceDetail.getName());
+                mDevices.get(i).setRssi(deviceDetail.getRssi());
                 if (null != deviceDetail.getiBeacon()) {
-                    if (deviceDetail.getiBeacon().equals(mDevices.get(i).getiBeacon())) {
+                    if (deviceDetail.getAdvData().equals(mDevices.get(i).getAdvData())) {
+                        Log.i("iBeacon", Integer.toString(i));
                         return false;
                     }
                 }
                 if (null != deviceDetail.getgBeacon()) {
-                    if (deviceDetail.getgBeacon().equals(mDevices.get(i).getgBeacon())) {
+                    if (deviceDetail.getAdvData().equals(mDevices.get(i).getAdvData())) {
                         return false;
                     }
                 }
                 if (null != deviceDetail.getAltBeacon()) {
-                    if (deviceDetail.getAltBeacon().equals(mDevices.get(i).getAltBeacon())) {
+                    if (deviceDetail.getAdvData().equals(mDevices.get(i).getAdvData())) {
                         return false;
                     }
                 }
-//                mDevices.get(i).setName(deviceDetail.getName());
-//                mDevices.get(i).setRssi(deviceDetail.getRssi());
-//                if (null != deviceDetail.getiBeacon()) {
-//                    mDevices.get(i).setiBeacon(deviceDetail.getiBeacon());
-//                } else {
-//                    mDevices.get(i).setiBeacon(null);
-//                }
-//                if (null != deviceDetail.getgBeacon()) {
-//                    mDevices.get(i).setgBeacon(deviceDetail.getgBeacon());
-//                } else {
-//                    mDevices.get(i).setgBeacon(null);
-//                }
-//                if (null != deviceDetail.getAltBeacon()) {
-//                    mDevices.get(i).setAltBeacon(deviceDetail.getAltBeacon());
-//                } else {
-//                    mDevices.get(i).setAltBeacon(null);
-//                }
-//                if (null == mDevices.get(i).getgBeacon() && null == mDevices.get(i).getiBeacon() && null == mDevices.get(i).getAltBeacon()) {
-//                    mDevices.remove(i);
-//                }
-//                break;
-
-
-//				mDevices.remove(i);
             }
         }
+        Log.i("count",Integer.toString(i));
         if (i >= mDevices.size()) {
             mDevices.add(deviceDetail);
-            return true;
+        }
+
+        //process the filter event.
+        if((boolean) SettingConfigUtil.getData(mContext, "filter_switch", false))
+        {
+            if (mDevices.get(i).getRssi() < ((int)SettingConfigUtil.getData(mContext, "filter_value", -100) - 100)) {
+                mDevices.remove(i);
+            }
+        }
+
+        if(mDevices.size() == 300){
+            tipsDialog = new TipsDialog(mContext);
+            tipsDialog.setInfo("many device were found,please pull down!");
+            tipsDialog.show();
         }
         return false;
+    }
 
+    public void sort() {
+        for (int i=0; i < mDevices.size() - 1; i++) {
+            for (int j = 0; j < mDevices.size() - 1 - i; j++) {
+                if(mDevices.get(j).getRssi() < mDevices.get(j + 1).getRssi()) {
+                    BluetoothDeviceWrapper bd = mDevices.get(j);
+                    mDevices.set(j, mDevices.get(j + 1));
+                    mDevices.set(j + 1, bd);
+                }
+            }
+        }
     }
 
     public void clearList() {

@@ -3,6 +3,7 @@ package com.feasycom.fsybecon.Activity;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -110,6 +111,7 @@ public class AddBeaconActivity extends BaseActivity {
     public void setClick() {
     }
 
+    private static final String TAG = "AddBeaconActivity";
     @OnClick(R.id.About_Button)
     public void aboutClick() {
         fscBeaconApi.disconnect();
@@ -124,10 +126,17 @@ public class AddBeaconActivity extends BaseActivity {
         activity.finish();
     }
 
+    @Override
+    public void sensorClick() {
+        fscBeaconApi.disconnect();
+        SensorActivity.actionStart(activity);
+        activity.finish();
+    }
+
     @OnClick(R.id.header_left)
     public void goBack() {
         activity.finish();
-        activity.overridePendingTransition(0, 0);
+//        activity.overridePendingTransition(0, 0);
     }
 
     @OnClick(R.id.header_right)

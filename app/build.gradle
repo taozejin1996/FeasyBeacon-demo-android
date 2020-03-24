@@ -1,18 +1,19 @@
 apply plugin: 'com.android.application'
-apply plugin:'com.jakewharton.butterknife'
+//apply plugin: 'com.jakewharton.butterknife'
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    def appName = "feasybeacon"
     defaultConfig {
-        applicationId "com.feasycom.fsybecon"
+        applicationId "com.feasycom.feasybeacon"
         minSdkVersion 18
-        targetSdkVersion 25
-        versionCode 21
-        versionName "3.0.4"
+        targetSdkVersion 26
+        versionCode 32
+        versionName "3.1.7"
+        flavorDimensions "versionCode"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-
+        multiDexEnabled true
         ndk {
-            abiFilters "armeabi","armeabi-v7a","arm64-v8a","x86","x86_64","mips","mips64"
+            abiFilters "armeabi", "armeabi-v7a", "arm64-v8a", "x86", "x86_64", "mips", "mips64"
         }
     }
     buildTypes {
@@ -22,22 +23,26 @@ android {
         }
     }
 
-    sourceSets {
-        main {
-            res.srcDirs =
-                    [
-                            'src/main/res/layouts/activity',
-                            'src/main/res/layouts/adapter',
-                            'src/main/res/layouts/beacon_view',
-                            'src/main/res/layouts/widget_view',
-                            'src/main/res/layouts/other',
-                            'src/main/res/layouts',
-                            'src/main/res/values/modle_version_control',
-                            'src/main/res/values',
-                            'src/main/res'
-                    ]
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            if (variant.buildType.name.equals('release')) {
+                variant.getPackageApplication().outputDirectory = new File(project.rootDir.absolutePath + "/apks")
+                def fileName = "${variant.flavorName}_${appName}_${variant.versionName}_R.apk"
+                outputFileName = fileName
+            } else {
+                def fileName = "${variant.flavorName}_${appName}_${variant.versionName}_D.apk"
+                outputFileName = fileName
+            }
         }
     }
+
+    productFlavors {
+    }
+
+    productFlavors.all {
+        flavor -> flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+    }
+
     compileOptions {
         targetCompatibility JavaVersion.VERSION_1_8
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -46,14 +51,17 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+    implementation 'com.android.support:design:26.1.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.jakewharton:butterknife:8.4.0'
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'org.greenrobot:eventbus:3.0.0'
-    testCompile 'junit:junit:4.12'
+//    implementation 'com.jakewharton:butterknife:8.4.0'
+    implementation 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'org.greenrobot:eventbus:3.0.0'
+    testImplementation 'junit:junit:4.12'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
 }

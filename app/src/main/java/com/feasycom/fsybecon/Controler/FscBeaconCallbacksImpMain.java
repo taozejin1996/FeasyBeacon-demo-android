@@ -1,5 +1,7 @@
 package com.feasycom.fsybecon.Controler;
 
+import android.util.Log;
+
 import com.feasycom.bean.BluetoothDeviceWrapper;
 import com.feasycom.controler.FscBeaconCallbacksImp;
 import com.feasycom.fsybecon.Activity.MainActivity;
@@ -12,6 +14,7 @@ import java.lang.ref.WeakReference;
 
 public class FscBeaconCallbacksImpMain extends FscBeaconCallbacksImp  {
     private WeakReference<MainActivity> weakReference;
+    private static final String TAG = "FscBeaconCallbacksImpMa";
 
     public FscBeaconCallbacksImpMain(WeakReference<MainActivity> weakReference) {
         this.weakReference = weakReference;

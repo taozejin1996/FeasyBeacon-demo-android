@@ -1,5 +1,6 @@
 package com.feasycom.fsybecon.Activity;
 
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -21,8 +22,9 @@ public abstract class BaseActivity extends AppCompatActivity {
         //强制竖屏
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         //干掉 activity 切换特效
-        overridePendingTransition(0, 0);
+//        overridePendingTransition(0, 0);
         super.onCreate(savedInstanceState);
+        Log.e("activity", getClass().getSimpleName());
 //        Log.d("activity", getClass().getSimpleName());
 //        Log.i("onCreat", getClass().getSimpleName());
         ActivityCollector.addActivity(this);
@@ -71,6 +73,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
+
     public abstract void refreshFooter();
 
     public abstract void refreshHeader();
@@ -82,6 +85,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     public abstract void aboutClick();
 
     public abstract void searchClick();
+
+    public abstract void sensorClick();
 
 
     public void finishActivity() {

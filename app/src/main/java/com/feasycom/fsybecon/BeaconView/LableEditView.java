@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -40,7 +41,6 @@ public class LableEditView extends LinearLayout {
         ButterKnife.bind(view);
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.LableEditView);
         String label = typedArray.getString(R.styleable.LableEditView_labelText);
-
         parameterLabel.setText(label);
         typedArray.recycle();
     }
@@ -68,9 +68,6 @@ public class LableEditView extends LinearLayout {
         return parameter.getText().toString();
     }
 
-    public void setSelection(int length) {
-        parameter.setSelection(length);
-    }
 
     public void setRed() {
         parameter.setTextColor(getResources().getColor(R.color.red));
@@ -102,14 +99,15 @@ public class LableEditView extends LinearLayout {
         if (event.getAction() == MotionEvent.ACTION_MOVE) {
         } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
-        }else if (event.getAction() == MotionEvent.ACTION_CANCEL){
+        } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
 //            if (firstEnter) {
 //                firstEnter = false;
-//                InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-//                imm.toggleSoftInput(0, InputMethodManager.SHOW_FORCED);
-//            }
-        }
+            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.toggleSoftInput(0, InputMethodManager.SHOW_FORCED);
 
+//            }
+
+        }
         return false;
     }
 

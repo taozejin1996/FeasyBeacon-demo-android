@@ -31,11 +31,13 @@ public class SettingBeaconParameterListAdapter extends BaseAdapter {
     private LayoutInflater mInflator;
     private Context mContext1;
     private ArrayList<BeaconBean> beacons = new ArrayList<BeaconBean>();
+    private FeasyBeacon fb;
 
-    public SettingBeaconParameterListAdapter(Context context, LayoutInflater Inflator) {
+    public SettingBeaconParameterListAdapter(Context context, LayoutInflater Inflator, FeasyBeacon fb) {
         super();
         mContext1 = context;
         mInflator = Inflator;
+        this.fb = fb;
     }
 
     @Override

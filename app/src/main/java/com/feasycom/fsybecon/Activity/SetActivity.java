@@ -13,10 +13,15 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.SeekBar;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -25,6 +30,7 @@ import com.feasycom.bean.FeasyBeacon;
 import com.feasycom.controler.FscBeaconApi;
 import com.feasycom.controler.FscBeaconApiImp;
 import com.feasycom.controler.FscBeaconCallbacksImp;
+import com.feasycom.fsybecon.Adapter.SearchDeviceListAdapter;
 import com.feasycom.fsybecon.Adapter.SettingDeviceListAdapter;
 import com.feasycom.fsybecon.Bean.BaseEvent;
 import com.feasycom.fsybecon.Controler.FscBeaconCallbacksImpSet;
@@ -53,7 +59,7 @@ import static com.feasycom.fsybecon.Activity.ParameterSettingActivity.TOTAL_COUN
  * Copyright 2017 Shenzhen Feasycom Technology co.,Ltd
  */
 
-public class SetActivity extends BaseActivity {
+public class SetActivity extends BaseActivity{
     @BindView(R.id.header_left)
     TextView headerLeft;
     @BindView(R.id.header_title)
@@ -70,6 +76,8 @@ public class SetActivity extends BaseActivity {
     ImageView SetButton;
     @BindView(R.id.About_Button)
     ImageView AboutButton;
+    @BindView(R.id.Sensor_Button)
+    ImageView SensorButton;
     private SettingDeviceListAdapter devicesAdapter;
     private FscBeaconApi fscBeaconApi;
     private Activity activity;
@@ -80,6 +88,7 @@ public class SetActivity extends BaseActivity {
     private Timer timerUI;
     private TimerTask timerTask;
     public static final boolean OPEN_TEST_MODE = false;
+    public static final boolean SCAN_FIXED_TIME = false;
     Queue<BluetoothDeviceWrapper> deviceQueue = new LinkedList<BluetoothDeviceWrapper>();
     /**
      * read and write permissions
@@ -111,18 +120,20 @@ public class SetActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(fscBeaconApi!=null){
+            Log.e("Set",fscBeaconApi.isConnected()+"");
+        }
         setContentView(R.layout.activity_set);
         activity = this;
         ButterKnife.bind(this);
         initView();
-
         devicesAdapter = new SettingDeviceListAdapter(activity, getLayoutInflater());
         devicesList.setAdapter(devicesAdapter);
         /**
          * remove the dividing line
          */
         devicesList.setDividerHeight(0);
-
         pinDialog = new PinDialog(activity);
     }
 
@@ -166,16 +177,31 @@ public class SetActivity extends BaseActivity {
         if (OPEN_TEST_MODE) {
             fscBeaconApi.startScan(25000);
         } else {
-            fscBeaconApi.startScan(15000);
+            if(SCAN_FIXED_TIME) {
+                fscBeaconApi.startScan(0);
+            }else {
+                fscBeaconApi.startScan(0);
+            }
         }
         timerUI = new Timer();
         timerTask = new UITimerTask(new WeakReference<SetActivity>((SetActivity) activity));
         timerUI.schedule(timerTask, 100, 100);
     }
 
-    @Override
+    private static final String TAG = "SetActivity";
+   @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK
+                && event.getRepeatCount() == 0) {
+            MainActivity.actionStart(this);
+            finishActivity();
+        }
+        return true;
     }
 
     @Override
@@ -215,7 +241,9 @@ public class SetActivity extends BaseActivity {
                         deviceQueue.clear();
                         devicesAdapter.clearList();
                         devicesAdapter.notifyDataSetChanged();
-                        fscBeaconApi.startScan(15000);
+                        fscBeaconApi.stopScan();
+                        // fscBeaconApi.startScan(15000);
+                        fscBeaconApi.startScan(0);
                         refreshableView.finishRefreshing();
                     }
                 });
@@ -242,10 +270,29 @@ public class SetActivity extends BaseActivity {
         if (OPEN_TEST_MODE) {
             headerTitle.setText(" total " + TOTAL_COUNT + " successful " + SUCESSFUL_COUNT);
         } else {
-            headerTitle.setText(getResources().getString(R.string.app_name));
+            //headerTitle.setText(getResources().getString(R.string.app_name));
+            headerTitle.setText("Setting");
+            //headerLeft.setText("   Sort");
+            //headerRight.setText("Filter   ");
+            headerLeft.setVisibility(View.GONE);
+            headerRight.setVisibility(View.GONE);
         }
     }
+    @OnClick(R.id.header_left)
+    public void deviceSort(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                devicesAdapter.sort();
+                devicesAdapter.notifyDataSetChanged();
+            }
+        });
+    }
 
+    @OnClick(R.id.header_right)
+    public void deviceFilterClick() {
+
+    }
     @Override
     public void refreshFooter() {
         /**
@@ -254,12 +301,13 @@ public class SetActivity extends BaseActivity {
         SetButton.setImageResource(R.drawable.setting_on);
         AboutButton.setImageResource(R.drawable.about_off);
         SearchButton.setImageResource(R.drawable.search_off);
+        SensorButton.setImageResource(R.drawable.sensor_off);
     }
 
     @OnItemClick(R.id.devicesList)
     public void deviceItemClick(int position) {
         BluetoothDeviceWrapper deviceDetail = (BluetoothDeviceWrapper) devicesAdapter.getItem(position);
-        if (null != deviceDetail.getFeasyBeacon() && null != deviceDetail.getFeasyBeacon() && FeasyBeacon.BLE_KEY_WAY.equals(deviceDetail.getFeasyBeacon().getEncryptionWay())) {
+        if (null != deviceDetail.getFeasyBeacon() && null != deviceDetail.getFeasyBeacon() && FeasyBeacon.BLE_KEY_WAY.equals(deviceDetail.getFeasyBeacon().getEncryptionWay().substring(1))) {
             pinDialog.show();
             pinDialog.setPosition(position);
         } else {
@@ -274,7 +322,15 @@ public class SetActivity extends BaseActivity {
      */
     @OnClick(R.id.Search_Button)
     public void searchClick() {
+        fscBeaconApi.stopScan();
         MainActivity.actionStart(activity);
+        finishActivity();
+    }
+
+    @OnClick(R.id.Sensor_Button)
+    public void sensorClick() {
+        fscBeaconApi.stopScan();
+        SensorActivity.actionStart(activity);
         finishActivity();
     }
 
@@ -283,6 +339,7 @@ public class SetActivity extends BaseActivity {
      */
     @OnClick(R.id.About_Button)
     public void aboutClick() {
+        fscBeaconApi.stopScan();
         AboutActivity.actionStart(activity);
         finishActivity();
     }
@@ -292,7 +349,8 @@ public class SetActivity extends BaseActivity {
      */
     @OnClick(R.id.Set_Button)
     public void setClick() {
-        fscBeaconApi.startScan(15000);
+//        fscBeaconApi.startScan(15000);
+        //fscBeaconApi.startScan(0);
     }
 
 
@@ -311,6 +369,7 @@ public class SetActivity extends BaseActivity {
         Toast.makeText(this, "BLE Hardware is required but not available!", Toast.LENGTH_LONG).show();
         finishActivity();
     }
+
 
     class UITimerTask extends TimerTask {
         private WeakReference<SetActivity> activityWeakReference;

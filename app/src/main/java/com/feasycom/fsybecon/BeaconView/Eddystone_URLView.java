@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.text.Editable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -35,6 +36,8 @@ import static com.feasycom.fsybecon.Activity.ParameterSettingActivity.firstEnter
  */
 
 public class Eddystone_URLView extends LinearLayout {
+
+    private static final String TAG = "Eddystone_URLView";
     public static final String URL_PROTOCOL_HTTP_WWW_DOT = "http://www.";
     public static final String URL_PROTOCOL_HTTPS_WWW_DOT = "https://www.";
     public static final String URL_PROTOCOL_HTTP = "http";
@@ -93,6 +96,9 @@ public class Eddystone_URLView extends LinearLayout {
             this.mBeacon = beacon;
             eddystonePower.addTextChangedListener(new ViewUtil.PowerTextWatcher(eddystonePowerLable, eddystonePower, mBeacon));
 
+            beaconEnable.toggleSwitch(true);
+            mBeacon.setEnable(true);
+
             beaconEnable.setOnStateChangedListener(new SwitchButton.OnStateChangedListener() {
 
                 @Override
@@ -139,6 +145,7 @@ public class Eddystone_URLView extends LinearLayout {
     }
 
     public void setUrl(String temp) {
+        Log.e(TAG, "setUrl: " + temp );
         eddystoneUrl.setText(temp);
     }
 
@@ -192,6 +199,7 @@ public class Eddystone_URLView extends LinearLayout {
                     }
                 } else {
                     int len = 0;
+                    header_url_foot = header_url_foot.replace("00", "0e");
                     String[] foots = header_url_foot.split("0");
                     for (int i = 1; i < foots.length; i++) {
                         foots[i] = "0" + foots[i];
@@ -203,7 +211,7 @@ public class Eddystone_URLView extends LinearLayout {
                         len = len + foots[i].length() - 2;
                     }
                     len = len + foots.length;
-                    if (len <= 17) {
+                    if (len <= 18) {
                         ViewUtil.setLabelEditBlock(eddystoneUrl, eddystoneUrlLabel);
                         mBeacon.setUrl(value);
                     } else {
@@ -224,28 +232,30 @@ public class Eddystone_URLView extends LinearLayout {
      */
     @OnTouch({R.id.eddystone_url, R.id.eddystone_power})
     public boolean touchListener(EditText v, MotionEvent event) {
-        EditText e = (EditText) v;
-        e.requestFocus();
-        e.setSelection(e.getText().length());
-//        LogUtil.i("action",event.getAction()+"");
-        if (event.getAction() == MotionEvent.ACTION_MOVE) {
-        } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
-        } else if (event.getAction() == MotionEvent.ACTION_UP) {
-        }else if (event.getAction() == MotionEvent.ACTION_CANCEL){
-//            if (firstEnter) {
-//                firstEnter = false;
-//                InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-//                imm.toggleSoftInput(0, InputMethodManager.SHOW_FORCED);
-//            }
-        }
+//        EditText e = (EditText) v;
+//        e.requestFocus();
+//        e.setSelection(e.getText().length());
+////        LogUtil.i("action",event.getAction()+"");
+//        if (event.getAction() == MotionEvent.ACTION_MOVE) {
+//        } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
+//        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+//        } else if (event.getAction() == MotionEvent.ACTION_CANCEL) {
+////            if (firstEnter) {
+////                firstEnter = false;
+//            InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+//            imm.toggleSoftInput(0, InputMethodManager.SHOW_FORCED);
+////            }
+//        }
         return false;
     }
 
     @OnClick({R.id.eddystone_url, R.id.eddystone_power})
     public void clickListener(EditText v) {
-        EditText e = (EditText) v;
-        e.requestFocus();
-        e.setSelection(e.getText().length());
+//        EditText e = (EditText) v;
+//        e.requestFocus();
+//        e.setSelection(e.getText().length());
+        v.setCursorVisible(false);
+        v.setCursorVisible(true);
     }
 
     /**
@@ -272,6 +282,7 @@ public class Eddystone_URLView extends LinearLayout {
      * @return 1字节(String)
      */
     public String getFootByHex(String url) {
+        Log.e(TAG, "getFootByHex: " + url );
         if (url.contains(URL_TLD_DOT_COM_SLASH)) {
             url = url.replace(URL_TLD_DOT_COM_SLASH, "00");           // EDDYSTONE_URL_COM_SLASH
         }
