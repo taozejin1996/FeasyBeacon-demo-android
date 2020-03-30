@@ -31,9 +31,14 @@ import com.feasycom.fsybecon.R;
 import com.feasycom.fsybecon.Widget.RefreshableView;
 import com.feasycom.util.LogUtil;
 import com.feasycom.util.TeaCode;
+import com.mylhyl.acp.Acp;
+import com.mylhyl.acp.AcpListener;
+import com.mylhyl.acp.AcpOptions;
+import com.tencent.bugly.crashreport.CrashReport;
 
 import java.lang.ref.WeakReference;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -147,7 +152,7 @@ public class MainActivity extends BaseActivity {
         /**
          * Check if we have write permission
          */
-        int permission2 = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        /*int permission2 = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         if (permission2 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                     this,
@@ -161,7 +166,39 @@ public class MainActivity extends BaseActivity {
             }else {
                 fscBeaconApi.startScan(0);
             }
-        }
+        }*/
+        Acp.getInstance(this).request(new AcpOptions.Builder()
+                        .setPermissions(Manifest.permission.ACCESS_FINE_LOCATION
+                                , Manifest.permission.ACCESS_COARSE_LOCATION
+                                , Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS
+                                , Manifest.permission.READ_EXTERNAL_STORAGE
+                                , Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        .setDeniedMessage(getResources().getString(R.string.denied_message))
+                        .setDeniedCloseBtn(getResources().getString(R.string.denied_close))
+                        .setDeniedSettingBtn(getResources().getString(R.string.denied_setting))
+                        .setRationalMessage(getResources().getString(R.string.rational_message))
+                        .setRationalBtn(getResources().getString(R.string.rational_btn))
+                        .build(),
+                new AcpListener() {
+                    @Override
+                    public void onGranted() {
+                        Log.e(TAG, "onGranted: 同意授权" );
+                       /* writeSD();
+                        getIMEI();*/
+                        fscBeaconApi.setCallbacks(new FscBeaconCallbacksImpMain(new WeakReference<MainActivity>((MainActivity) activity)));
+                        if(SCAN_FIXED_TIME) {
+                            fscBeaconApi.startScan(60000);
+                        }else {
+                            fscBeaconApi.startScan(0);
+                        }
+                    }
+
+                    @Override
+                    public void onDenied(List<String> permissions) {
+                        // makeText(permissions.toString() + "权限拒绝");
+                        Log.e(TAG, "onDenied: 拒绝权限" );
+                    }
+                });
         timerUI = new Timer();
         timerTask = new UITimerTask(new WeakReference<MainActivity>((MainActivity) activity));
         timerUI.schedule(timerTask, 100, 100);
@@ -310,8 +347,8 @@ public class MainActivity extends BaseActivity {
     @OnClick(R.id.Set_Button)
     public void setClick() {
         fscBeaconApi.stopScan();
-        Log.e(TAG, "setClick: ");
         SetActivity.actionStart(activity);
+        // Log.e(TAG, "setClick: ");
         finishActivity();
     }
 

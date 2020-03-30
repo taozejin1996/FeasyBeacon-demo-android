@@ -54,42 +54,17 @@ public class SettingDeviceListAdapter extends BaseAdapter {
         }
         else {
             if(null != deviceDetail.getFeasyBeacon()) {
-                int i = 0;
-                for (; i < mDevices.size(); i++) {
-                    if (deviceDetail.getAddress().equals(mDevices.get(i).getAddress())) {
-                        mDevices.get(i).setCompleteLocalName(deviceDetail.getCompleteLocalName());
-                        mDevices.get(i).setName(deviceDetail.getName());
-                        mDevices.get(i).setRssi(deviceDetail.getRssi());
-
-                        if (null != deviceDetail.getiBeacon()) {
-                            mDevices.get(i).setiBeacon(deviceDetail.getiBeacon());
-                        } else {
-                            mDevices.get(i).setiBeacon(null);
-                        }
-                        if (null != deviceDetail.getgBeacon()) {
-                            mDevices.get(i).setgBeacon(deviceDetail.getgBeacon());
-                        } else {
-                            mDevices.get(i).setgBeacon(null);
-                        }
-                        if (null != deviceDetail.getFeasyBeacon()) {
-                            mDevices.get(i).setFeasyBeacon(deviceDetail.getFeasyBeacon());
-                        } else {
-                            mDevices.get(i).setFeasyBeacon(null);
-                        }
-
-                        break;
-                    }
-                }
-                if (i >= mDevices.size()) {
-                    mDevices.add(deviceDetail);
-                }
-                /*if(("21".equals(deviceDetail.getFeasyBeacon().getmodule()) || "25".equals(deviceDetail.getFeasyBeacon().getmodule()) || "26".equals(deviceDetail.getFeasyBeacon().getmodule())
-                        || "27".equals(deviceDetail.getFeasyBeacon().getmodule()) || "28".equals(deviceDetail.getFeasyBeacon().getmodule())
-                || "29".equals(deviceDetail.getFeasyBeacon().getmodule())
-                        || "30".equals(deviceDetail.getFeasyBeacon().getmodule())
-                        ||"34".equals(deviceDetail.getFeasyBeacon().getmodule())
-                        ||"35".equals(deviceDetail.getFeasyBeacon().getmodule())
-                    || "31".equals(deviceDetail.getFeasyBeacon().getmodule())) && (deviceDetail.getRssi() >= -80)){
+                if(("21".equals(deviceDetail.getFeasyBeacon().getModule())
+                        || "25".equals(deviceDetail.getFeasyBeacon().getModule())
+                        || "26".equals(deviceDetail.getFeasyBeacon().getModule())
+                        || "27".equals(deviceDetail.getFeasyBeacon().getModule())
+                        || "28".equals(deviceDetail.getFeasyBeacon().getModule())
+                        || "29".equals(deviceDetail.getFeasyBeacon().getModule())
+                        || "30".equals(deviceDetail.getFeasyBeacon().getModule())
+                        ||"34".equals(deviceDetail.getFeasyBeacon().getModule())
+                        ||"35".equals(deviceDetail.getFeasyBeacon().getModule())
+                        || "31".equals(deviceDetail.getFeasyBeacon().getModule())
+                        || "39".equals(deviceDetail.getFeasyBeacon().getModule())) && (deviceDetail.getRssi() >= -80)){
                     int i = 0;
                     for (; i < mDevices.size(); i++) {
                         if (deviceDetail.getAddress().equals(mDevices.get(i).getAddress())) {
@@ -119,7 +94,7 @@ public class SettingDeviceListAdapter extends BaseAdapter {
                     if (i >= mDevices.size()) {
                         mDevices.add(deviceDetail);
                     }
-                }*/
+                }
             }
         }
 /*

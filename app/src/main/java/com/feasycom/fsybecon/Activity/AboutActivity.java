@@ -118,7 +118,6 @@ public class AboutActivity extends BaseActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
                 && event.getRepeatCount() == 0) {
-            Log.e(TAG, "onKeyDown: " );
             SetActivity.actionStart(activity);
             finishActivity();
         }

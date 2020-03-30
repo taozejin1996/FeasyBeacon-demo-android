@@ -74,6 +74,7 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
         } else if (status == CommandBean.PASSWORD_SUCCESSFULE) {
             Log.e(TAG, "connectProgressUpdate: password sucessful" );
             parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("password sucessful...");
+            Log.e("ly",moduleString);
             fscBeaconApi.startGetDeviceInfo(moduleString, fb);
         } else if (status == CommandBean.PASSWORD_FAILED) {
             Log.e(TAG, "connectProgressUpdate: password failed" );
@@ -125,7 +126,6 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
                         MainActivity.actionStart(parameterSettingActivityWeakReference.get().getActivity());
                     }*/
                     parameterSettingActivityWeakReference.get().finishActivity();
-                    Log.i("finish", "1");
                 }
             }, InfoDialog.INFO_DIAOLOG_SHOW_TIME);
         }
@@ -187,6 +187,9 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
 
     @Override
     public void deviceInfo(final String parameterName, final Object parameter) {
+        if(parameter instanceof String){
+            Log.e("ly","parameterName : " + parameterName + "     parameter:   " + parameter );
+        }
         if (parameterSettingActivityWeakReference.get() == null) {
             return;
         }
@@ -208,7 +211,6 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
                 }
             });
         } else if (CommandBean.COMMAND_NAME.equals(parameterName)) {
-            Log.e(TAG, "deviceInfo: " + (String) parameter);
             parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -217,7 +219,6 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
             });
         } else if (CommandBean.COMMAND_ADVIN.equals(parameterName)) {
             Integer data = Integer.valueOf((String) parameter);
-            Log.e(TAG, "deviceInfo: " + data);
             parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

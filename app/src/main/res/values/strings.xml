@@ -20,6 +20,12 @@
     <string name="FaceBook_addr">Feasycom</string>
     <string name="appVersion">Version</string>
 
+    <string name="denied_message">You reject the permission application, this function will not work properly, you can go to the settings page to re-authorize</string>
+    <string name="denied_close">close</string>
+    <string name="denied_setting">setting</string>
+    <string name="rational_message">This feature requires your authorization, otherwise it will not work properly</string>
+    <string name="rational_btn">I know</string>
+
 
     // header
     <string name="back">&#60; Back</string>

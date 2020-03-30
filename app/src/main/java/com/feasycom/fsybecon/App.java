@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.feasycom.fsybecon.Service.BluetoothService;
+import com.tencent.bugly.crashreport.CrashReport;
 
 public class App extends Application {
     private static final String TAG = "App";
@@ -37,6 +38,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        CrashReport.initCrashReport(getApplicationContext(), "360d4f05fa", false);
         instance = this;
         Intent btServiceIntent = new Intent(this, BluetoothService.class);
         bindService(btServiceIntent, connection, Context.BIND_AUTO_CREATE);

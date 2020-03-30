@@ -162,6 +162,7 @@ public class ParameterSettingActivity extends BaseActivity{
     public static boolean isModule_BP109 = false;
     public static boolean isModule_BP101 = false;
     public static boolean isModule_BP671 = false;
+    public static boolean isModule_BP108 = false;
     public static boolean interval = true;
     public static boolean gsensor = false;
     public static boolean keycfg = false;
@@ -275,6 +276,7 @@ public class ParameterSettingActivity extends BaseActivity{
                 isModule_BP109 = false;
                 isModule_BP101 = false;
                 isModule_BP671 = false;
+                isModule_BP108 = false;
                 TxPower.setVisibility(View.VISIBLE);
                 TxPowerDivider.setVisibility(View.VISIBLE);
                 txPowerlist = Arrays.asList(getResources().getStringArray(R.array.txpower_table));
@@ -284,12 +286,14 @@ public class ParameterSettingActivity extends BaseActivity{
                 isModule_BP109 = true;
                 isModule_BP101 = false;
                 isModule_BP671 = false;
+                isModule_BP108 = false;
                 TxPower.setVisibility(View.GONE);
                 TxPowerDivider.setVisibility(View.GONE);
             } else if ("30".equals(moduleString)) {//BP101
                 isModule_BP109 = false;
-                isModule_BP671 = false;
                 isModule_BP101 = true;
+                isModule_BP671 = false;
+                isModule_BP108 = false;
                 TxPower.setVisibility(View.VISIBLE);
                 TxPowerDivider.setVisibility(View.VISIBLE);
                 txPowerlist = Arrays.asList(getResources().getStringArray(R.array.BP101_txpower_table));
@@ -297,11 +301,22 @@ public class ParameterSettingActivity extends BaseActivity{
                 TxPower.spinnerInit(intervalSpinnerAdapter, txPowerlist);
             } else if ("31".equals(moduleString)) {//BP671
                 isModule_BP109 = false;
-                isModule_BP671 = true;
                 isModule_BP101 = false;
+                isModule_BP671 = true;
+                isModule_BP108 = false;
                 TxPower.setVisibility(View.VISIBLE);
                 TxPowerDivider.setVisibility(View.VISIBLE);
                 txPowerlist = Arrays.asList(getResources().getStringArray(R.array.BP671_txpower_table));
+                intervalSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, txPowerlist);
+                TxPower.spinnerInit(intervalSpinnerAdapter, txPowerlist);
+            } else if ("39".equals(moduleString)) {//BP108
+                isModule_BP109 = false;
+                isModule_BP101 = false;
+                isModule_BP671 = false;
+                isModule_BP108 = true;
+                TxPower.setVisibility(View.VISIBLE);
+                TxPowerDivider.setVisibility(View.VISIBLE);
+                txPowerlist = Arrays.asList(getResources().getStringArray(R.array.BP108_txpower_table));
                 intervalSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, txPowerlist);
                 TxPower.spinnerInit(intervalSpinnerAdapter, txPowerlist);
             }
@@ -419,11 +434,9 @@ public class ParameterSettingActivity extends BaseActivity{
         Connectable.setOnToggleChanged(new ToggleButton.OnToggleChanged() {
             @Override
             public void onToggle(boolean on) {
-                Log.e(TAG, "onToggle: **********" );
                 fscBeaconApi.setConnectable(on);
             }
         });
-        Log.e(TAG, "initView: **********" );
         fscBeaconApi.setCallbacks(new FscBeaconCallbacksImpParameter(new WeakReference<ParameterSettingActivity>((ParameterSettingActivity) activity), fscBeaconApi, moduleString, device.getFeasyBeacon()));
     }
 
@@ -433,7 +446,6 @@ public class ParameterSettingActivity extends BaseActivity{
                 && event.getRepeatCount() == 0) {
             fscBeaconApi.disconnect();
             SetActivity.actionStart(activity);
-            Log.e(TAG, "onKeyDown: 1" );
             finishActivity();
         }
         return true;
@@ -488,7 +500,6 @@ public class ParameterSettingActivity extends BaseActivity{
                 break;
             case BaseEvent.OTA_EVENT_YES:
                 UpgradeActivity.actionStart(activity, device, pin2Connect);
-                Log.e(TAG, "onEventMainThread: 2" );
                 finishActivity();
                 break;
             case BaseEvent.OTA_EVENT_NO:
@@ -511,7 +522,6 @@ public class ParameterSettingActivity extends BaseActivity{
     public void aboutClick() {
         fscBeaconApi.disconnect();
         AboutActivity.actionStart(activity);
-        Log.e(TAG, "aboutClick: 3" );
         finishActivity();
     }
 
@@ -519,7 +529,6 @@ public class ParameterSettingActivity extends BaseActivity{
     public void searchClick() {
         fscBeaconApi.disconnect();
         MainActivity.actionStart(activity);
-        Log.e(TAG, "searchClick: 4" );
         finishActivity();
     }
 
@@ -527,7 +536,6 @@ public class ParameterSettingActivity extends BaseActivity{
     public void sensorClick() {
         fscBeaconApi.disconnect();
         SensorActivity.actionStart(activity);
-        Log.e(TAG, "sensorClick: 5" );
         finishActivity();
     }
 
@@ -597,7 +605,6 @@ public class ParameterSettingActivity extends BaseActivity{
     public void connectFailedHandler() {
         if(back){
             SetActivity.actionStart(activity);
-            Log.e(TAG, "connectFailedHandler: 6" );
             finishActivity();
         }else{
             handler.postDelayed(new Runnable() {
@@ -617,7 +624,6 @@ public class ParameterSettingActivity extends BaseActivity{
         connectDialog.show();
         handler.postDelayed(checkConnect, CHECK_CONNECT_TIME);
         fscBeaconApi.connect(device, pin2Connect);
-        Log.e(TAG, "connectAndGetInfomation: " + device.getAddress() + "   " + pin2Connect );
         TOTAL_COUNT++;
     }
 
