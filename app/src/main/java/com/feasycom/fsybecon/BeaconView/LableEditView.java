@@ -42,6 +42,9 @@ public class LableEditView extends LinearLayout {
         TypedArray typedArray = getContext().obtainStyledAttributes(attrs, R.styleable.LableEditView);
         String label = typedArray.getString(R.styleable.LableEditView_labelText);
         parameterLabel.setText(label);
+        if("Extend: ".equals(label)){
+            parameter.setVisibility(View.GONE);
+        }
         typedArray.recycle();
     }
 

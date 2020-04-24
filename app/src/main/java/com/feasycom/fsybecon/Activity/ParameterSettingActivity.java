@@ -163,6 +163,8 @@ public class ParameterSettingActivity extends BaseActivity{
     public static boolean isModule_BP101 = false;
     public static boolean isModule_BP671 = false;
     public static boolean isModule_BP108 = false;
+    public static boolean isModule_BP120 = false;
+    public static boolean isKeycfg = false;
     public static boolean interval = true;
     public static boolean gsensor = false;
     public static boolean keycfg = false;
@@ -206,18 +208,13 @@ public class ParameterSettingActivity extends BaseActivity{
          */
         ButterKnife.bind(this);
 
-
-
-/*
-        txPowerlist = Arrays.asList(getResources().getStringArray(R.array.txpower_table));
-        spinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, txPowerlist);
-        TxPower.spinnerInit(spinnerAdapter, txPowerlist);
-*/
         if (null != device.getFeasyBeacon()) {
             encryptWay = device.getFeasyBeacon().getEncryptionWay();
 
             moduleString = device.getFeasyBeacon().getModule();
+
             checkLength(encryptWay, device.getFeasyBeacon());
+
             advin = Arrays.asList(getResources().getStringArray(R.array.advin));
             duration = Arrays.asList(getResources().getStringArray(R.array.duration));
 
@@ -244,25 +241,6 @@ public class ParameterSettingActivity extends BaseActivity{
                 adv_gsensor.spinnerAdvin(gsensorAdvinSpinnerAdapter, advin);
                 adv_gsensor.spinnerDuration(gsensorDurationSpinnerAdapter, duration);
             }
-            /*if (device.getFeasyBeacon().getBuzzer()) {
-                adv_buzzer.setVisibility(View.VISIBLE);
-                advBuzzerList = Arrays.asList(getResources().getStringArray(R.array.buzzer));
-                buzzerSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, advBuzzerList);
-                adv_buzzer.spinnerInit(buzzerSpinnerAdapter, advBuzzerList);
-
-            }
-            if (device.getFeasyBeacon().getLed()) {
-                adv_led.setVisibility(View.VISIBLE);
-                advLedList = Arrays.asList(getResources().getStringArray(R.array.led));
-                ledSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, advLedList);
-                adv_led.spinnerInit(ledSpinnerAdapter, advLedList);
-            }*/
-
-          /*  Log.e("ParameterSetting_Gsenso",device.getFeasyBeacon().getGsensor()+"");
-            Log.e("ParameterSetting_Buzzer",device.getFeasyBeacon().getBuzzer()+"");
-            Log.e("ParameterSetting_Led",device.getFeasyBeacon().getLed()+"");
-             Log.e("ParameterSetting_Key",device.getFeasyBeacon().getKey()+"");*/
-
 
             /**
              * We will be compatible with many modules by moduleString and versionString
@@ -277,6 +255,7 @@ public class ParameterSettingActivity extends BaseActivity{
                 isModule_BP101 = false;
                 isModule_BP671 = false;
                 isModule_BP108 = false;
+                isModule_BP120 = false;
                 TxPower.setVisibility(View.VISIBLE);
                 TxPowerDivider.setVisibility(View.VISIBLE);
                 txPowerlist = Arrays.asList(getResources().getStringArray(R.array.txpower_table));
@@ -287,6 +266,7 @@ public class ParameterSettingActivity extends BaseActivity{
                 isModule_BP101 = false;
                 isModule_BP671 = false;
                 isModule_BP108 = false;
+                isModule_BP120 = false;
                 TxPower.setVisibility(View.GONE);
                 TxPowerDivider.setVisibility(View.GONE);
             } else if ("30".equals(moduleString)) {//BP101
@@ -294,6 +274,7 @@ public class ParameterSettingActivity extends BaseActivity{
                 isModule_BP101 = true;
                 isModule_BP671 = false;
                 isModule_BP108 = false;
+                isModule_BP120 = false;
                 TxPower.setVisibility(View.VISIBLE);
                 TxPowerDivider.setVisibility(View.VISIBLE);
                 txPowerlist = Arrays.asList(getResources().getStringArray(R.array.BP101_txpower_table));
@@ -304,6 +285,7 @@ public class ParameterSettingActivity extends BaseActivity{
                 isModule_BP101 = false;
                 isModule_BP671 = true;
                 isModule_BP108 = false;
+                isModule_BP120 = false;
                 TxPower.setVisibility(View.VISIBLE);
                 TxPowerDivider.setVisibility(View.VISIBLE);
                 txPowerlist = Arrays.asList(getResources().getStringArray(R.array.BP671_txpower_table));
@@ -314,6 +296,18 @@ public class ParameterSettingActivity extends BaseActivity{
                 isModule_BP101 = false;
                 isModule_BP671 = false;
                 isModule_BP108 = true;
+                isModule_BP120 = false;
+                TxPower.setVisibility(View.VISIBLE);
+                TxPowerDivider.setVisibility(View.VISIBLE);
+                txPowerlist = Arrays.asList(getResources().getStringArray(R.array.BP108_txpower_table));
+                intervalSpinnerAdapter = new ArrayAdapter<String>(activity, android.R.layout.simple_spinner_dropdown_item, txPowerlist);
+                TxPower.spinnerInit(intervalSpinnerAdapter, txPowerlist);
+            } else if("36".equals(moduleString)) {      // BP120
+                isModule_BP109 = false;
+                isModule_BP101 = false;
+                isModule_BP671 = false;
+                isModule_BP108 = false;
+                isModule_BP120 = true;
                 TxPower.setVisibility(View.VISIBLE);
                 TxPowerDivider.setVisibility(View.VISIBLE);
                 txPowerlist = Arrays.asList(getResources().getStringArray(R.array.BP108_txpower_table));
@@ -358,7 +352,9 @@ public class ParameterSettingActivity extends BaseActivity{
                 case 0:
                     if (c[i] == '0') {
                         fb.setKeycfg(false);
+                        isKeycfg = false;
                     } else {
+                        isKeycfg = true;
                         fb.setKeycfg(true);
                         // fb.setKeycfg(false);
                     }
@@ -612,7 +608,6 @@ public class ParameterSettingActivity extends BaseActivity{
                 public void run() {
                     connectDialog.dismiss();
                     fscBeaconApi.disconnect();
-                    Log.e(TAG, "保存后的页面跳转 " );
                     SetActivity.actionStart(activity);
                     finishActivity();
                 }

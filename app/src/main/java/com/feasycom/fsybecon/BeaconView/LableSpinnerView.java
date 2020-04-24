@@ -20,6 +20,7 @@ import butterknife.ButterKnife;
 import butterknife.OnItemSelected;
 
 import static com.feasycom.fsybecon.Activity.ParameterSettingActivity.isModule_BP101;
+import static com.feasycom.fsybecon.Activity.ParameterSettingActivity.isModule_BP108;
 import static com.feasycom.fsybecon.Activity.ParameterSettingActivity.isModule_BP671;
 
 
@@ -69,62 +70,7 @@ public class LableSpinnerView extends LinearLayout {
 
     @OnItemSelected(R.id.spinner)
     public void powerSelect(View v, int id) {
-        if(isModule_BP101 == true){
-            switch (id){
-                case 0:
-                    powerParameter = "";
-                    setRed();
-                    break;
-                case 1:
-                    powerParameter = "0";
-                    setBlock();
-                    break;
-                case 2:
-                    powerParameter = "1";
-                    setBlock();
-                    break;
-                case 3:
-                    powerParameter = "2";
-                    setBlock();
-                    break;
-                case 4:
-                    powerParameter = "3";
-                    setBlock();
-                    break;
-                case 5:
-                    powerParameter = "4";
-                    setBlock();
-                    break;
-                case 6:
-                    powerParameter = "5";
-                    setBlock();
-                    break;
-                case 7:
-                    powerParameter = "6";
-                    setBlock();
-                    break;
-                case 8:
-                    powerParameter = "7";
-                    setBlock();
-                    break;
-                case 9:
-                    powerParameter = "8";
-                    setBlock();
-                    break;
-                case 10:
-                    powerParameter = "9";
-                    setBlock();
-                    break;
-                case 11:
-                    powerParameter = "A";
-                    setBlock();
-                    break;
-                default:
-                    setRed();
-                    powerParameter = "";
-            }
-        }
-        else if(isModule_BP671 == true){
+        if(isModule_BP671 == true){
             switch(id){
                 case 0:
                     powerParameter = "-50";
@@ -237,7 +183,6 @@ public class LableSpinnerView extends LinearLayout {
         }
         else {
             switch (id) {
-
                 case 0:
                     powerParameter = "";
                     setRed();

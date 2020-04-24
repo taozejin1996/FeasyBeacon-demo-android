@@ -241,7 +241,6 @@ public abstract class ViewUtil {
         @Override
         public void afterTextChanged(Editable s) {
             String value = s.toString();
-            Log.e("Interval",value);
             if (value.length() == 0) {
                 lableEditView.setRed();
                 return;

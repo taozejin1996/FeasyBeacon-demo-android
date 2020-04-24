@@ -61,10 +61,12 @@ public class SettingDeviceListAdapter extends BaseAdapter {
                         || "28".equals(deviceDetail.getFeasyBeacon().getModule())
                         || "29".equals(deviceDetail.getFeasyBeacon().getModule())
                         || "30".equals(deviceDetail.getFeasyBeacon().getModule())
-                        ||"34".equals(deviceDetail.getFeasyBeacon().getModule())
-                        ||"35".equals(deviceDetail.getFeasyBeacon().getModule())
+                        || "34".equals(deviceDetail.getFeasyBeacon().getModule())
+                        || "35".equals(deviceDetail.getFeasyBeacon().getModule())
                         || "31".equals(deviceDetail.getFeasyBeacon().getModule())
-                        || "39".equals(deviceDetail.getFeasyBeacon().getModule())) && (deviceDetail.getRssi() >= -80)){
+                        || "36".equals(deviceDetail.getFeasyBeacon().getModule())
+                        || "39".equals(deviceDetail.getFeasyBeacon().getModule()))
+                        && (deviceDetail.getRssi() >= -80)){
                     int i = 0;
                     for (; i < mDevices.size(); i++) {
                         if (deviceDetail.getAddress().equals(mDevices.get(i).getAddress())) {

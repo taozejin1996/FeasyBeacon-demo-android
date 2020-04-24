@@ -69,19 +69,14 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
             return;
         }
         if (status == CommandBean.PASSWORD_CHECK) {
-            Log.e(TAG, "connectProgressUpdate: check password" );
             parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("check password...");
         } else if (status == CommandBean.PASSWORD_SUCCESSFULE) {
-            Log.e(TAG, "connectProgressUpdate: password sucessful" );
             parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("password sucessful...");
-            Log.e("ly",moduleString);
             fscBeaconApi.startGetDeviceInfo(moduleString, fb);
         } else if (status == CommandBean.PASSWORD_FAILED) {
-            Log.e(TAG, "connectProgressUpdate: password failed" );
             parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("password failed...");
             parameterSettingActivityWeakReference.get().connectFailedHandler();
         } else if (status == CommandBean.PASSWORD_TIME_OUT) {
-            Log.e(TAG, "connectProgressUpdate: timeout" );
             parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("timeout");
             parameterSettingActivityWeakReference.get().connectFailedHandler();
         }
@@ -103,6 +98,7 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
         if (parameterSettingActivityWeakReference.get() == null) {
             return;
         }
+        Log.e(TAG, "atCommandCallBack: " +status );
         // Log.e("atCommandCallBack",command+"");
         /**
          * get module information and save module information are through the AT command to configure
@@ -187,8 +183,8 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
 
     @Override
     public void deviceInfo(final String parameterName, final Object parameter) {
-        if(parameter instanceof String){
-            Log.e("ly","parameterName : " + parameterName + "     parameter:   " + parameter );
+        if(parameter instanceof  String){
+            Log.e(TAG, "deviceInfo: " + parameterName + "   " + parameter );
         }
         if (parameterSettingActivityWeakReference.get() == null) {
             return;
@@ -293,21 +289,11 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
                 }
             });
 
-            /*
-            parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    parameterSettingActivityWeakReference.get().getInterval().setText((String) parameter, true);
-                }
-            });
-            */
         } else if (CommandBean.COMMAND_KEYCFG.equals(parameterName)) {
             String[] s = (String[]) parameter;
             parameterSettingActivityWeakReference.get().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-
-
                     if (Integer.parseInt(s[0]) == 0) {                                                      //0ms
                         parameterSettingActivityWeakReference.get().getKeycfg().setAdvinSelect(0);
                     } else if (Integer.parseInt(s[0]) == 100) {                                              //100ms
@@ -468,7 +454,6 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
                         String BP671[] = {"-200", "-107", "-95", "-82", "-70", "-65", "-5", "30", "45", "53", "60", "71", "80", "92", "102", "110", "120", "130", "141", "150", "160", "170", "181", "190", "200"};
                         for (int i = 0; i < BP671.length; i++) {
                             if (BP671[i].equals((String) parameter)) {
-                                Log.e(TAG, "run: " + i);
                                 parameterSettingActivityWeakReference.get().getTxPower().setSelect(i + 1);
                                 break;
                             }

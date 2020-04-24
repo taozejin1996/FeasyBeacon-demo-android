@@ -50,7 +50,6 @@ public class FscBeaconCallbacksImpSensor extends FscBeaconCallbacksImp {
         } else {
 //            if ((null != device.getgBeacon()) || (null != device.getiBeacon()) || (null != device.getAltBeacon())) {
             if ((weakReference.get() != null) && (weakReference.get().getDeviceQueue().size() < 350) && device.getMonitor() != null) {
-                Log.e(TAG, "blePeripheralFound: " + device.getAddress());
                 weakReference.get().getDeviceQueue().offer(device);
             }
 //            }

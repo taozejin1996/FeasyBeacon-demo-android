@@ -145,7 +145,6 @@ public class Eddystone_URLView extends LinearLayout {
     }
 
     public void setUrl(String temp) {
-        Log.e(TAG, "setUrl: " + temp );
         eddystoneUrl.setText(temp);
     }
 

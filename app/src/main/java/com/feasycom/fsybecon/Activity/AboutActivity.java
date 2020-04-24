@@ -10,6 +10,7 @@ import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -22,6 +23,10 @@ import com.feasycom.fsybecon.Widget.QRDialog;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static com.feasycom.fsybecon.Activity.ParameterSettingActivity.SUCESSFUL_COUNT;
+import static com.feasycom.fsybecon.Activity.ParameterSettingActivity.TOTAL_COUNT;
+
 /**
  * Copyright 2017 Shenzhen Feasycom Technology co.,Ltd
  */
@@ -43,6 +48,8 @@ public class AboutActivity extends BaseActivity {
     TextView ver;
     @BindView(R.id.Sensor_Button)
     ImageView SensorButton;
+    @BindView(R.id.header_title)
+    TextView headerTitle;
 
     private Activity activity;
 
@@ -57,6 +64,7 @@ public class AboutActivity extends BaseActivity {
         setContentView(R.layout.activity_about);
         activity = this;
         ButterKnife.bind(activity);
+
         aboutUsTV.setText(Html.fromHtml("<p><b>Feasycom</b> focus on the researching and developing of IoT (internet of things) products, including Bluetooth Modules ,WiFi and LoRa Modules,Bluetooth Beacon,etc. With more than 10-year experiences in the wireless connectivity, which ensure us have the capability for providing low-risk product development, reducing system integration cost and shortening product customization cycle to thousands of diverse customer worldwide.</p>\n" +
                 "\n" +
                 "<p>&nbsp</p>\n" +
@@ -103,6 +111,7 @@ public class AboutActivity extends BaseActivity {
 
     @Override
     public void refreshHeader() {
+        headerTitle.setText("About");
     }
 
     public void refreshFooter() {
@@ -113,7 +122,6 @@ public class AboutActivity extends BaseActivity {
         SensorButton.setImageResource(R.drawable.sensor_off);
     }
 
-    private static final String TAG = "AboutActivity";
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK
