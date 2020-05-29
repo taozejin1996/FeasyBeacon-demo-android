@@ -4,6 +4,9 @@ Listings/
 App.bin/
 JLinkLog.txt
 
+
+
+
 # Keil
 OBJ/
 LST/
@@ -24,6 +27,7 @@ Obj/
 *.lst
 *.axf
 *.htm
+*.apk
 
 *.TMP
 
@@ -40,14 +44,22 @@ Obj/
 *.SearchResults
 *.WK3
 
-#Android Studio
+
 *.iml
 .gradle
 /local.properties
-/.idea/workspace.xml
+
+
+/captures
+/.idea/caches
 /.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
 .DS_Store
 /build
 /captures
 .externalNativeBuild
+.cxx
 
