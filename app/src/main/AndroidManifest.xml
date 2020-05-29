@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.feasycom.fsybecon">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.feasycom.feasyblue">
 
+    <!-- 获取activity栈 -->
+    <uses-permission android:name="android.permission.GET_TASKS" />
     <!-- 蓝牙SPP权限 -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <!-- for 三星 -->
-    <permission
-        android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
-        android:protectionLevel="signature" />
+
     <!-- 蓝牙BLE权限 -->
     <uses-feature android:name="android.hardware.bluetooth_le" />
 
@@ -16,11 +16,24 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
-<!--    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />-->
-    <!-- 系统对话框权限 -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
+
     <!-- 文件数据权限 -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- SDCard中创建与删除文件权限 -->
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <!-- 向SDCard写入数据权限 -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- 添加可以向外拨打电话的权限 -->
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <!--
+    摇一摇权限
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    -->
+    <!-- 强制横屏权限 -->
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -31,34 +44,32 @@
         android:name=".App"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:roundIcon="@mipmap/ic_launcher"
+        android:label="@string/appName"
+        android:largeHeap="true"
+        android:screenOrientation="portrait"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <meta-data
-            android:name="android.max_aspect"
-            android:value="2.1" />
-
+            android:name="android.support.FILE_PROVIDER_PATHS"
+            android:resource="@xml/filepaths"
+            />
         <activity
-            android:name=".Activity.AdvertisingActivity"
-            android:screenOrientation="portrait"
-            android:launchMode="singleTask"
-            android:theme="@style/Theme.notAnimation">
+            android:name=".Activity.SearchDeviceActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Activity.ParameterSettingActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.notAnimation"
-            android:windowSoftInputMode="adjustPan" />
 
         <service
             android:name="com.feasycom.service.AtCommandService"
+            android:enabled="true"
+            android:exported="true" />
+        <service
+            android:name="com.feasycom.service.SmartLinkService"
             android:enabled="true"
             android:exported="true" />
         <service
@@ -67,38 +78,61 @@
             android:exported="true" />
 
         <activity
-            android:name=".Activity.SetActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.notAnimation"
-            android:windowSoftInputMode="adjustPan" />
-        <activity
-            android:name=".Activity.SensorActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.notAnimation"
-            android:windowSoftInputMode="adjustPan" />
+            android:name=".Activity.ThroughputActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Activity.AboutActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.notAnimation" />
+            android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.AddBeaconActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.notAnimation" />
+            android:name=".Activity.SettingActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.MainActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.notAnimation" />
+            android:name=".Activity.ServiceSelectActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.UpgradeActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.notAnimation" />
-        <activity android:name=".Activity.GuideActivity" />
+            android:name=".Activity.ParameterModificationActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.FilterDeviceActivity"
-            android:label="@string/title_activity_filter_device"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-<!--        <activity android:name=".Activity.FileterDeviceActivity" />-->
-        <service android:name=".Service.BluetoothService"/>
+            android:name=".Activity.ParameterModificationDeviceListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.ParameterModifyInformationActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.OtaActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.OtaDeviceListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.QRCodeActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.CharacteristicDetialActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.QuickConnectionActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".Activity.filterDeviceActivity"></activity>
+
+        <activity
+            android:name=".dfileselector.activity.DefaultSelectorActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait" />
+
+        <!--<activity
+            android:name=".Activity.WifiSettingParameterActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".Activity.WifiModifyInformationActivity"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".Activity.WifiModificationDeviceListActivity"
+            android:screenOrientation="portrait" />-->
+
     </application>
 
 </manifest>

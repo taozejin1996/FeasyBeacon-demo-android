@@ -24,7 +24,6 @@ Obj/
 *.lst
 *.axf
 *.htm
-*.apk
 
 *.TMP
 
@@ -41,7 +40,7 @@ Obj/
 *.SearchResults
 *.WK3
 
-
+#Android Studio
 *.iml
 .gradle
 /local.properties
