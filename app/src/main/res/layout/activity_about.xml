@@ -119,11 +119,13 @@
 
             <TextView
                 style="@style/module_TV"
-                android:text="User Guide"
+                android:text="@string/userGuide"
                 android:textColor="@color/about_text" />
 
             <TextView
                 style="@style/About_Right_TV"
+                android:layout_width="283dp"
+                android:layout_height="50dp"
                 android:autoLink="web"
                 android:text="https://www.feasybeacon.com/uploads/Feasybeacon-User-Manual.pdf" />
         </LinearLayout>
@@ -147,6 +149,38 @@
                 android:layout_height="wrap_content"
                 android:src="@drawable/qrcode" />
         </LinearLayout>
+
+        <LinearLayout style="@style/About_LL">
+
+            <TextView
+                style="@style/module_TV"
+                android:text="@string/userAgreement"
+                android:textColor="@color/about_text" />
+
+            <TextView
+                android:id="@+id/userAgreement"
+                style="@style/About_Right_TV"
+                android:layout_width="283dp"
+                android:layout_height="50dp"
+                android:text="@string/detail" />
+        </LinearLayout>
+
+        <LinearLayout style="@style/About_LL">
+
+            <TextView
+                style="@style/module_TV"
+                android:text="@string/privacyAgreement"
+                android:textColor="@color/about_text" />
+
+            <TextView
+                android:id="@+id/privacyAgreement"
+                style="@style/About_Right_TV"
+                android:layout_width="283dp"
+                android:layout_height="50dp"
+                android:text="@string/detail" />
+        </LinearLayout>
+
+
 
         <LinearLayout style="@style/About_LL">
 

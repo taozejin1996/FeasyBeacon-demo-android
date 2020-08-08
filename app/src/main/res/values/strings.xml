@@ -4,6 +4,15 @@
 
     //默认值
     <!-- 默认 0db-->
+    <string name="localLanguage">en</string>
+    <string name="ok">ok</string>
+    <string name="cancel">cancel</string>
+    <string name="userAndPrivacyAgreement">User Agreement and Privacy Agreement</string>
+    <string name="userAndPrivacyAgreementDetail">If you use APP, it means that you agree to the User Agreement and Privacy Agreement.Please go to "About" for details of the agreement.</string>
+
+    <!-- tab -->
+    <string name="setting">Setting</string>
+    <string name="about">About</string>
 
     //关于
     <string name="more">more ></string>
@@ -19,7 +28,11 @@
     <string name="Facebook">Facebook</string>
     <string name="FaceBook_addr">Feasycom</string>
     <string name="appVersion">Version</string>
+    <string name="userAgreement">User agreement</string>
+    <string name="privacyAgreement">Privacy agreement</string>
+    <string name="userGuide">User guide</string>
 
+    <string name="detail">detail</string>
     <string name="denied_message">You reject the permission application, this function will not work properly, you can go to the settings page to re-authorize</string>
     <string name="denied_close">close</string>
     <string name="denied_setting">setting</string>

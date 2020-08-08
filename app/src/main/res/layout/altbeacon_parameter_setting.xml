@@ -122,7 +122,7 @@
                 android:textColor="@color/about_title"
                 android:textSize="14sp" />
 
-            <com.feasycom.fsybecon.Widget.SwitchButton
+            <com.feasycom.feasybeacon.Widget.SwitchButton
                 android:id="@+id/beacon_enable"
                 android:layout_width="54dp"
                 android:layout_height="30dp" />

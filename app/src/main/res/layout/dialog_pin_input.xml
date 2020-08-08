@@ -45,13 +45,14 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:background="@drawable/bg_round">
+
             <Button
                 android:id="@+id/no"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/btn_round_left"
-                android:text="Cancel"
+                android:text="@string/cancel"
                 android:textSize="13sp" />
 
             <include layout="@layout/line_vertical"/>
@@ -62,7 +63,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:background="@drawable/btn_round_right"
-                android:text="yes"
+                android:text="@string/ok"
                 android:textSize="13sp" />
         </LinearLayout>
     </LinearLayout>

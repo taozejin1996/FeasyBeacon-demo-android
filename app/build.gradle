@@ -3,14 +3,15 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 //apply plugin: 'com.jakewharton.butterknife'
 android {
-    compileSdkVersion 26
+    compileSdkVersion 30
+
     def appName = "feasybeacon"
     defaultConfig {
         applicationId "com.feasycom.feasybeacon"
         minSdkVersion 18
-        targetSdkVersion 26
-        versionCode 32
-        versionName "3.2.0"
+        targetSdkVersion 28
+        versionCode 33
+        versionName "3.2.1"
         flavorDimensions "versionCode"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -58,6 +59,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0'
+
 }
 repositories {
     mavenCentral()

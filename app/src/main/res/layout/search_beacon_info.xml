@@ -66,22 +66,22 @@
             </LinearLayout>
 
 
-            <com.feasycom.fsybecon.BeaconView.IBeaconItem
+            <com.feasycom.feasybeacon.BeaconView.IBeaconItem
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/iBeacon_item_view"
                 android:visibility="gone"
                 />
-            <com.feasycom.fsybecon.BeaconView.EddystoneBeaconItem
+            <com.feasycom.feasybeacon.BeaconView.EddystoneBeaconItem
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/gBeacon_item_view"
                 android:visibility="gone"/>
-            <com.feasycom.fsybecon.BeaconView.AltBeaconItem
+            <com.feasycom.feasybeacon.BeaconView.AltBeaconItem
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/altBeacon_item_view"
-                android:visibility="gone"></com.feasycom.fsybecon.BeaconView.AltBeaconItem>
+                android:visibility="gone"></com.feasycom.feasybeacon.BeaconView.AltBeaconItem>
         </LinearLayout>
     </LinearLayout>
 

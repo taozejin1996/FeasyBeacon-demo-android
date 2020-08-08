@@ -16,7 +16,7 @@
             android:textSize="14sp"
             android:textColor="@color/about_title"/>
 
-        <com.feasycom.fsybecon.Widget.ToggleButton
+        <com.feasycom.feasybeacon.Widget.ToggleButton
             android:id="@+id/button"
             android:layout_width="54dp"
             android:layout_height="30dp"
@@ -24,7 +24,7 @@
             app:tbOffBorderColor="#ddd"
             app:tbOffColor="#ddd"
             app:tbOnColor="#3ec85c"
-            app:tbSpotColor="#fff"></com.feasycom.fsybecon.Widget.ToggleButton>
+            app:tbSpotColor="#fff"></com.feasycom.feasybeacon.Widget.ToggleButton>
 
     </LinearLayout>
 
