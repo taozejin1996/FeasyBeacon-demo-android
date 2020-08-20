@@ -1,7 +1,7 @@
 package com.feasycom.feasybeacon.Activity;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebView;
@@ -21,6 +21,8 @@ public class AgreementActivity extends AppCompatActivity {
         setContentView(R.layout.activity_agreement);
         Intent intent = getIntent();
         int type = intent.getIntExtra("type", 0);
+        WebView webView = (WebView) findViewById(R.id.webView);
+        webView.loadData("Loading...", "8", "utf-8");
         request(type);
         ((TextView) findViewById(R.id.goback)).setOnClickListener(new MyOnClickListener());
         ((TextView) findViewById(R.id.title)).setText(type == 1 ? R.string.userAgreement : R.string.privacyAgreement);

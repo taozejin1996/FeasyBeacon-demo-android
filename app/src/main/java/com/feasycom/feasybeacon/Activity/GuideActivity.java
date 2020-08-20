@@ -3,8 +3,9 @@ package com.feasycom.feasybeacon.Activity;
 import android.content.Context;
 import android.content.Intent;
 
-import android.support.v4.view.ViewPager;
+import androidx.viewpager.widget.ViewPager;
 
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
@@ -25,6 +26,7 @@ public class GuideActivity extends BaseActivity implements ViewPager.OnPageChang
 
     private ImageView ib_start;
 
+    private static final String TAG = "GuideActivity";
 
     public static void actionStart(Context context) {
         Intent intent = new Intent(context, GuideActivity.class);
@@ -36,7 +38,7 @@ public class GuideActivity extends BaseActivity implements ViewPager.OnPageChang
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_guide);
-
+        Log.e(TAG, "onCreate: *************" );
         ib_start = (ImageView) findViewById(R.id.start_app_button);
         ib_start.setOnClickListener(new View.OnClickListener() {
             @Override

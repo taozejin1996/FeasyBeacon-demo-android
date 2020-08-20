@@ -150,7 +150,8 @@
                 android:src="@drawable/qrcode" />
         </LinearLayout>
 
-        <LinearLayout style="@style/About_LL">
+        <LinearLayout style="@style/About_LL"
+            android:visibility="gone">
 
             <TextView
                 style="@style/module_TV"
@@ -165,7 +166,8 @@
                 android:text="@string/detail" />
         </LinearLayout>
 
-        <LinearLayout style="@style/About_LL">
+        <LinearLayout style="@style/About_LL"
+            android:visibility="gone">
 
             <TextView
                 style="@style/module_TV"

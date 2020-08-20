@@ -175,7 +175,6 @@ public class ParameterSettingActivity extends BaseActivity{
         activity = this;
         EventBus.getDefault().register(this);
         device = (BluetoothDeviceWrapper) getIntent().getSerializableExtra("device");
-        Log.e(TAG,device.getName());
         pin2Connect = (String) getIntent().getSerializableExtra("pin");
 
         connectDialog = new InfoDialog(activity, "connecting...");

@@ -1,6 +1,6 @@
 package com.feasycom.feasybeacon.Adapter
 
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -21,9 +21,6 @@ class SensorAdapter : RecyclerView.Adapter<SensorAdapter.ViewHolder>(){
 
     private var isClick: Boolean = false;
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
-        return ViewHolder(LayoutInflater.from(parent?.context).inflate(R.layout.sensor_device_info, parent,false))
-    }
 
     override fun getItemCount(): Int {
         return mDevices.size
@@ -148,6 +145,10 @@ class SensorAdapter : RecyclerView.Adapter<SensorAdapter.ViewHolder>(){
 
     companion object{
         const val TAG = "SensorAdapter"
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        return ViewHolder(LayoutInflater.from(parent?.context).inflate(R.layout.sensor_device_info, parent,false))
     }
 
 }

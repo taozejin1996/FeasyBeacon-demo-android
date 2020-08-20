@@ -1,7 +1,7 @@
 package com.feasycom.feasybeacon.Adapter
 
 import android.content.Context
-import android.support.v7.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -26,7 +26,7 @@ class SearchAdapter(val context: Context) : RecyclerView.Adapter<SearchAdapter.V
 
     private var isClick: Boolean = false;
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(parent?.context).inflate(R.layout.search_beacon_info, parent,false))
     }
 
