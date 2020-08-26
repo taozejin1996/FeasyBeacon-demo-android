@@ -86,7 +86,6 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Log.e(TAG, "onCreate: " );
         activity = this;
         ButterKnife.bind(this);
         fscBeaconApi = FscBeaconApiImp.getInstance(activity);
@@ -120,7 +119,7 @@ public class MainActivity extends BaseActivity {
          */
         // devicesList.setDividerHeight(0);
         // 检查是否首次打开
-        ACache mCache = ACache.get(this);
+        /*ACache mCache = ACache.get(this);
         String isHaveOn = mCache.getAsString("haveOn");
         if (isHaveOn == null){
             mCache.put("haveOn", "haveOn");
@@ -138,9 +137,9 @@ public class MainActivity extends BaseActivity {
                                     bundle.putInt("type",2);
                                     Intent intent = new Intent();
                                     intent.setClass(MainActivity.this, AgreementActivity.class);
-                                    /*将Bundle对象assign给Intent*/
+                                    *//*将Bundle对象assign给Intent*//*
                                     intent.putExtras(bundle);
-                                    /*跳转Activity Second*/
+                                    *//*跳转Activity Second*//*
                                     startActivityForResult(intent,0);
 
                                 }
@@ -153,9 +152,9 @@ public class MainActivity extends BaseActivity {
                                     bundle.putInt("type",1);
                                     Intent intent = new Intent();
                                     intent.setClass(MainActivity.this, AgreementActivity.class);
-                                    /*将Bundle对象assign给Intent*/
+                                    *//*将Bundle对象assign给Intent*//*
                                     intent.putExtras(bundle);
-                                    /*跳转Activity Second*/
+                                    *//*跳转Activity Second*//*
                                     startActivityForResult(intent,0);
 
                                 }
@@ -173,7 +172,7 @@ public class MainActivity extends BaseActivity {
 
 // show it
             alertDialog.show();
-        }
+        }*/
     }
 
     void initpermission(){
@@ -212,7 +211,7 @@ public class MainActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         LogUtil.setDebug(true);
-        fscBeaconApi.setCallbacks(new FscBeaconCallbacksImpMain(new WeakReference<MainActivity>((MainActivity) activity)));
+        fscBeaconApi.setCallbacks(new FscBeaconCallbacksImpMain(new WeakReference<>((MainActivity) activity)));
         /*if(SCAN_FIXED_TIME) {
             fscBeaconApi.startScan(60000);
         }else {

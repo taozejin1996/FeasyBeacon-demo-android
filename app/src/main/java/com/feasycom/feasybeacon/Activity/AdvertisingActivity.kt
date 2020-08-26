@@ -64,11 +64,12 @@ class AdvertisingActivity : BaseActivity() {
     }
 
 
-    private val handler = Handler()
+    private val handler = Handler(Handler.Callback {
+        false
+    })
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_advertising)
-        handler.postDelayed({
             if (isFirstIn) {
                 GuideActivity.actionStart(this)
                 finish()
@@ -83,21 +84,22 @@ class AdvertisingActivity : BaseActivity() {
                 timer.schedule(timerTask, 1000, 1000)
 
                 lifecycleScope.launch {
-                    try{
-                        api.getLauch(parameter).apply {
-                            sp.edit {
-                                putString("url", data.image)
+                    launch {
+                        try {
+                            api.getLauch(parameter).apply {
+                                sp.edit {
+                                    putString("url", data.image)
+                                }
+                                Log.e(TAG, "onCreate: " + data.image )
                             }
+                        }catch (e: Exception){
 
-                            Glide.with(this@AdvertisingActivity)
-                                    .load(data.image)
-                                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                    .into(lanch_img)
                         }
+                    }
 
-                    }catch (e: Exception){
+                    launch {
                         Glide.with(this@AdvertisingActivity)
-                                .load(sp.getString("url",""))
+                                .load(sp.getString("url", "https://image.feasycom.com/lanchImage/beacon/lanch.png"))
                                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                                 .into(lanch_img)
                     }
@@ -109,7 +111,6 @@ class AdvertisingActivity : BaseActivity() {
                     }
                 }
             }
-        }, 0)
     }
 
     private val isFirstIn: Boolean

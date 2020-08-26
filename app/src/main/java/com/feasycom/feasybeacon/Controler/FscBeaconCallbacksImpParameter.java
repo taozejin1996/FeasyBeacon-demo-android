@@ -2,7 +2,11 @@ package com.feasycom.feasybeacon.Controler;
 
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.feasycom.bean.BeaconBean;
 import com.feasycom.bean.CommandBean;
@@ -37,6 +41,32 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
     private FscBleCentralApi fscBleCentralApi = FscBleCentralApiImp.getInstance();
     private CommandBean commandBean = new CommandBean();
 
+    private Handler handler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message message) {
+            Log.e(TAG, "handleMessage: " + Thread.currentThread().getName() );
+            switch (message.what){
+                case CommandBean.PASSWORD_CHECK:
+                    parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("check password...");
+                    break;
+                case CommandBean.PASSWORD_SUCCESSFULE:
+                    parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("password sucessful...");
+                    fscBeaconApi.startGetDeviceInfo(moduleString, fb);
+                    break;
+                case CommandBean.PASSWORD_FAILED:
+                    parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("password failed...");
+                    parameterSettingActivityWeakReference.get().connectFailedHandler();
+                    break;
+                case CommandBean.PASSWORD_TIME_OUT:
+                    parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("timeout");
+                    parameterSettingActivityWeakReference.get().connectFailedHandler();
+                    break;
+            }
+            return  false;
+        }
+    });
+
+
     public static boolean state = false;
 
     public FscBeaconCallbacksImpParameter(WeakReference<ParameterSettingActivity> parameterSettingActivityWeakReference, FscBeaconApi fscBeaconApi, String moduleString, FeasyBeacon fb) {
@@ -61,7 +91,11 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
         if (parameterSettingActivityWeakReference.get() == null) {
             return;
         }
-        if (status == CommandBean.PASSWORD_CHECK) {
+        Message message = new Message();
+        message.what = status;
+        handler.sendMessage(message);
+       /* if (status == CommandBean.PASSWORD_CHECK) {
+
             parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("check password...");
         } else if (status == CommandBean.PASSWORD_SUCCESSFULE) {
             parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("password sucessful...");
@@ -72,12 +106,11 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
         } else if (status == CommandBean.PASSWORD_TIME_OUT) {
             parameterSettingActivityWeakReference.get().getConnectDialog().setInfo("timeout");
             parameterSettingActivityWeakReference.get().connectFailedHandler();
-        }
+        }*/
     }
 
     @Override
     public void blePeripheralDisonnected(BluetoothGatt gatt, BluetoothDevice device) {
-        Log.e(TAG, "blePeripheralDisonnected: " );
         if (parameterSettingActivityWeakReference.get() == null) {
             return;
         }
@@ -88,7 +121,7 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
 
     @Override
     public void atCommandCallBack(String command, String param, String status) {
-        Log.e(TAG, "atCommandCallBack: " );
+        Log.e(TAG, "atCommandCallBack: " + status );
         if (parameterSettingActivityWeakReference.get() == null) {
             return;
         }
@@ -139,7 +172,12 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
                 }
             }, InfoDialog.INFO_DIAOLOG_SHOW_TIME);
         }
-
+        Log.e(TAG, "atCommandCallBack: " + CommandBean.COMMAND_FINISH.equals(status) );
+        Log.e(TAG, "atCommandCallBack: " + ("connected".equals(parameterSettingActivityWeakReference.get().getConnectDialog().getInfo())) );
+        if (CommandBean.COMMAND_FINISH.equals(status) && "connected".equals(parameterSettingActivityWeakReference.get().getConnectDialog().getInfo())){
+            Log.e(TAG, "atCommandCallBack: 关闭" );
+            parameterSettingActivityWeakReference.get().getConnectDialog().dismiss();
+        }
         if (CommandBean.COMMAND_FINISH.equals(status) && "connected".equals(parameterSettingActivityWeakReference.get().getConnectDialog().getInfo())) {
             // fscBeaconApi.setBuzzer(true);
             parameterSettingActivityWeakReference.get().getConnectDialog().dismiss();
@@ -154,20 +192,19 @@ public class FscBeaconCallbacksImpParameter extends FscBeaconCallbacksImp {
                     }
                 }, 2000);
             }
-
         } else {
             /**
              * parameter modification success or failure here to deal with
              * eg command  AT+NAME=123  status COMMAND_SUCCESSFUL
              */
             if (CommandBean.COMMAND_TIME_OUT.equals(status)) {
-//                Log.i("timeout", command);
+    //                Log.i("timeout", command);
             } else if (CommandBean.COMMAND_FAILED.equals(status)) {
-//                Log.i("failed", command);
+    //                Log.i("failed", command);
             } else if (CommandBean.COMMAND_SUCCESSFUL.equals(status)) {
-//                Log.i("success", command);
+    //                Log.i("success", command);
             } else if (CommandBean.COMMAND_NO_NEED.equals(status)) {
-//                Log.i("no_need", command);
+    //                Log.i("no_need", command);
             }
         }
     }
